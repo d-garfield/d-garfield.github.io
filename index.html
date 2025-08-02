@@ -294,7 +294,7 @@
             currentPokemon = await fetchPokemon(pokemonId);
             if (currentPokemon) {
                 createChart(currentPokemon.stats, currentPokemon.name);
-                message.textContent = 'Guess the Pokémon based on the stat graph!';
+                message.textContent = 'Guess the Pokémon based on its BST';
                 guessInput.value = '';
                 currentBlur = 15;
                 pokemonSprite.style.filter = `blur(${currentBlur}px) grayscale(100%)`;
