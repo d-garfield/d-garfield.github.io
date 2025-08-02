@@ -115,6 +115,7 @@
         const homeMenu = document.getElementById('homeMenu');
         const gameScreen = document.getElementById('gameScreen');
         const gameTitle = document.getElementById('gameTitle');
+        const hints = document.getElementById('hints');
         let currentPokemon = null;
         let myChart = null;
         let totalGuesses = 0;
@@ -122,6 +123,7 @@
         let dailyPokemonIds = [];
         let currentBlur = 15;
         let gameMode = null;
+        let incorrectGuesses = 0;
 
         // List of fully evolved Pokémon IDs (subset for brevity, up to Gen 8)
         const fullyEvolvedPokemonIds = [
@@ -307,6 +309,7 @@
                 message.textContent = 'Failed to load Pokémon. Try again!';
                 pokemonSprite.style.display = 'none';
             }
+            incorrectGuesses = 0;
         }
 
         function checkGuess() {
@@ -319,14 +322,31 @@
                 pokemonSprite.style.filter = 'none';
                 guessButton.classList.add('hidden');
                 nextButton.classList.remove('hidden');
+                document.getElementById('hints').innerHTML = '';
             } else {
+                incorrectGuesses++;
                 currentBlur = Math.max(currentBlur - 3, 0);
                 pokemonSprite.style.filter = `blur(${currentBlur}px) grayscale(100%)`;
-                message.textContent = `Incorrect. Try again!`;
+
+                // Get ability
+                const abilityHint = currentPokemon.abilities[0].ability.name.charAt(0).toUpperCase() + currentPokemon.abilities[0].ability.name.slice(1);
+
+                // Get types
+                const typeHint = currentPokemon.types.map(t => t.type.name.charAt(0).toUpperCase() + t.type.name.slice(1)).join(', ');
+
+                if (incorrectGuesses === 1) {
+                    message.innerHTML = `Incorrect.<br>Hints coming next!`;
+                } else if (incorrectGuesses === 2) {
+                    message.innerHTML = `Incorrect.<br>Ability: ${abilityHint}`;
+                } else {
+                    // After 2nd incorrect guess, keep showing both hints
+                    message.innerHTML = `Incorrect.<br>Ability: ${abilityHint}<br>Type(s): ${typeHint}`;
+                }
             }
             guessInput.value = '';
             guessInput.focus();
         }
+        
 
         function startDailyChallenge() {
             gameMode = 'daily';
