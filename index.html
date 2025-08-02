@@ -63,6 +63,10 @@
         .blurred-grey {
             filter: blur(15px) grayscale(100%);
         }
+        #statChart {
+    display: block;
+    margin-left: 0;
+}
     </style>
 </head>
 <body class="bg-gray-100 flex items-center justify-center min-h-screen min-w-screen">
@@ -84,7 +88,7 @@
         </div>
         <div class="flex flex-col lg:flex-row lg:items-start lg:space-x-4 w-full max-w-4xl">
             <img id="pokemonSprite" alt="Pokémon Sprite" class="blurred-grey" />
-            <canvas id="statChart" class="mb-4"></canvas>
+            <canvas id="statChart" class="mb-2"></canvas>
         </div>
         <div class="flex flex-col items-center space-y-4">
             <input id="guessInput" type="text" placeholder="Enter Pokémon name" class="border p-2 rounded w-64">
