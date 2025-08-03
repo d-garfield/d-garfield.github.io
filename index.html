@@ -462,8 +462,14 @@
 fetch('https://pokeapi.co/api/v2/pokemon?limit=1025')
   .then(response => response.json())
   .then(data => {
-    const names = data.results.map(p => p.name.charAt(0).toUpperCase() + p.name.slice(1));
-    console.log(names);
+    const datalist = document.getElementById('pokemon-list');
+    datalist.innerHTML = ""; // Clear any old options
+    data.results.forEach(p => {
+      const name = p.name.charAt(0).toUpperCase() + p.name.slice(1);
+      const option = document.createElement('option');
+      option.value = name;
+      datalist.appendChild(option);
+    });
   });
     </script>
 </body>
