@@ -457,6 +457,14 @@
     option.value = name;
     datalist.appendChild(option);
 });
+
+// Run this in your browser console or Node.js to get all Pokémon names
+fetch('https://pokeapi.co/api/v2/pokemon?limit=1025')
+  .then(response => response.json())
+  .then(data => {
+    const names = data.results.map(p => p.name.charAt(0).toUpperCase() + p.name.slice(1));
+    console.log(names);
+  });
     </script>
 </body>
 </html>
