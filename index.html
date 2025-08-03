@@ -92,10 +92,12 @@
         </div>
         <div class="flex flex-col items-center justify-center space-y-4 mx-auto">
             <input id="guessInput" type="text" placeholder="Enter Pokémon name" class="border p-2 rounded w-64">
-            <button id="guessButton" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Submit Guess</button>
-            <button id="nextButton" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">Next Pokémon</button>
-            <button id="restartButton" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 hidden">Restart Challenge</button>
-            <button id="returnToMenuButton" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">Return to Menu</button>
+            <div class="flex flex-row items-center justify-center space-x-2 mt-2">
+        <button id="guessButton" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Submit Guess</button>
+        <button id="nextButton" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">Next Pokémon</button>
+        <button id="restartButton" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 hidden">Restart Challenge</button>
+        <button id="returnToMenuButton" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">Return to Menu</button>
+    </div>
         </div>
     </div>
     <footer class="w-full bg-gray-200 py-4 mt-8 flex flex-col items-center justify-center text-center text-sm">
@@ -109,7 +111,7 @@
         <details>
             <summary class="cursor-pointer font-semibold">Terms of Service</summary>
             <p class="mt-2">
-                By using this site, you agree to use it for entertainment purposes only. All Pokémon data is provided by the PokéAPI and is for non-commercial use.
+                By using this site, you agree to use it for entertainment purposes only. All Pokémon data is provided by the PokéAPI BST Guesser is not affiliated with Nintendo and does not own or claim any rights to any Nintendo trademark or the Pokémon trademark, and all references to such are used for commentary and informational purposes only.
             </p>
         </details>
         <p class="mt-4 text-gray-500">&copy; 2025 BST Guesser</p>
