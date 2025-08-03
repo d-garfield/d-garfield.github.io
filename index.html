@@ -62,13 +62,14 @@
             flex-direction: column;
         }
         canvas {
-            max-width: 450px;
+            max-width: 100% !important;
+            width: 100% !important;
             margin: 0 auto;
-            height: 300px !important;
+            height: 250px !important; /* Smaller height for mobile */
         }
         #pokemonSprite {
-            max-width: 300px !important;
-            width: 300px !important; /* Force a fixed width instead of 100% */
+            max-width: 250px !important;
+            width: 250px !important;
             height: auto;
             margin-bottom: 1rem;
             display: block; /* Ensure consistent display */
@@ -80,6 +81,7 @@
             display: block;
             margin-left: auto;
             margin-right: auto;
+            max-width: 100%;
         }
         /* Override any dark text */
         p, h1, h2, h3, label, summary {
@@ -128,6 +130,7 @@
             width: 100%;
             max-width: 1200px;
             margin: 0 auto;
+            padding: 0 16px; /* Add padding for mobile */
         }
 
         /* Add this to your existing <style> section */
@@ -203,6 +206,95 @@
             color: #fbbf24;
             margin: 8px 0;
         }
+
+        /* Mobile-friendly canvas sizing */
+        canvas {
+            max-width: 100% !important;
+            width: 100% !important;
+            margin: 0 auto;
+            height: 250px !important; /* Smaller height for mobile */
+        }
+
+        /* Better mobile layout for game screen */
+        #gameScreen {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 16px; /* Add padding for mobile */
+        }
+
+        /* Responsive flex layout */
+        .flex.flex-col.lg\\:flex-row {
+            flex-direction: column !important;
+            gap: 16px;
+        }
+
+        /* Mobile button adjustments */
+        @media (max-width: 768px) {
+            /* Stack buttons vertically on small screens */
+            .flex.flex-row.items-center.justify-center.space-x-2 {
+                flex-direction: column !important;
+                gap: 8px !important;
+                width: 100%;
+            }
+            
+            .flex.flex-row.items-center.justify-center.space-x-2 > button {
+                width: 100% !important;
+                max-width: 200px;
+            }
+            
+            /* Smaller buttons container */
+            .flex.flex-row.items-center.justify-center.space-x-3 {
+                flex-direction: row !important;
+                gap: 12px !important;
+                width: 100%;
+                justify-content: center;
+            }
+            
+            /* Canvas adjustments for mobile */
+            canvas {
+                height: 200px !important;
+                max-width: 350px !important;
+            }
+            
+            /* Pokemon sprite adjustments */
+            #pokemonSprite {
+                max-width: 250px !important;
+                width: 250px !important;
+            }
+            
+            /* Input field adjustments */
+            #guessInput {
+                width: 100% !important;
+                max-width: 300px;
+            }
+            
+            /* Title adjustments */
+            .main-title {
+                font-size: 1.5rem !important;
+                padding: 12px 16px !important;
+            }
+            
+            /* Hints text smaller on mobile */
+            #hints p {
+                font-size: 0.9rem !important;
+            }
+        }
+
+        /* Ensure canvas container is responsive */
+        .flex.flex-col.lg\\:flex-row.items-center.justify-center {
+            width: 100%;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+        }
+
+        /* Make sure the chart container doesn't overflow */
+        #statChart {
+            display: block;
+            margin: 0 auto;
+            max-width: 100%;
+        }
     </style>
 </head>
 <body style="background-color: #0f1729;">
@@ -232,8 +324,8 @@
                 <p id="guesses" class="text-lg text-center font-semibold">Total Guesses: 0</p>
                 <p id="progress" class="text-lg text-center font-semibold">Pokémon: 1/5</p>
             </div>
-            <div class="flex flex-col lg:flex-row items-center justify-center lg:space-x-4 w-full max-w-4xl mx-auto">
-                <div class="flex flex-col items-center">
+            <div class="flex flex-col lg:flex-row items-center justify-center lg:space-x-4 w-full max-w-4xl mx-auto px-4">
+                <div class="flex flex-col items-center w-full">
                     <img id="pokemonSprite" alt="Pokémon Sprite" class="blurred-grey mx-auto" />
                     <!-- Add hints section below the sprite -->
                     <div id="hints" class="text-center mt-4">
@@ -241,9 +333,11 @@
                         <p id="abilityHint" class="text-lg"><span style="color: #9ca3af;">Ability: ???</span></p>
                     </div>
                 </div>
-                <canvas id="statChart" class="mb-2 mx-auto"></canvas>
+                <div class="w-full flex justify-center">
+                    <canvas id="statChart" class="mb-2"></canvas>
+                </div>
             </div>
-            <div class="flex flex-col items-center justify-center space-y-4 mx-auto">
+            <div class="flex flex-col items-center justify-center space-y-4 mx-auto w-full px-4">
                 <!-- Move message above the input box -->
                 <p id="message" class="text-lg text-center font-semibold">Guess the Pokémon!</p>
                 
@@ -251,11 +345,11 @@
                 <datalist id="pokemon-list">
                     <!-- Options will be added by JavaScript -->
                 </datalist>
-                <div class="flex flex-row items-center justify-center space-x-2 mt-2">
-                    <button id="returnToMenuButton" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">Return to Menu</button>
-                    <button id="nextButton" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 hidden">Next Pokémon</button>
-                    <button id="restartButton" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 hidden">Restart Challenge</button>
-                    <button id="guessButton" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Submit Guess</button>
+                <div class="flex flex-col sm:flex-row items-center justify-center gap-2 mt-2 w-full">
+                    <button id="returnToMenuButton" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 w-full sm:w-auto">Return to Menu</button>
+                    <button id="nextButton" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 hidden w-full sm:w-auto">Next Pokémon</button>
+                    <button id="restartButton" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 hidden w-full sm:w-auto">Restart Challenge</button>
+                    <button id="guessButton" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 w-full sm:w-auto">Submit Guess</button>
                 </div>
                 <!-- Add smaller buttons underneath -->
                 <div class="flex flex-row items-center justify-center space-x-3 mt-2">
