@@ -180,6 +180,29 @@
         button:active {
             box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
         }
+
+        /* Results styling */
+        .results-container {
+            background: linear-gradient(135deg, rgba(96, 165, 250, 0.1), rgba(147, 197, 253, 0.1));
+            border: 2px solid #60a5fa;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 16px 0;
+            text-align: center;
+        }
+
+        .score-display {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #10b981;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .rank-display {
+            font-size: 1.2rem;
+            color: #fbbf24;
+            margin: 8px 0;
+        }
     </style>
 </head>
 <body style="background-color: #0f1729;">
@@ -206,7 +229,6 @@
         <div id="gameScreen" class="hidden flex flex-col items-center justify-center w-full mx-auto">
             <h1 id="gameTitle" class="main-title text-3xl font-bold mb-4 mx-auto text-white text-center"></h1>
             <div class="mb-4 mx-auto">
-                <p id="message" class="text-lg text-center"></p>
                 <p id="guesses" class="text-lg text-center font-semibold">Total Guesses: 0</p>
                 <p id="progress" class="text-lg text-center font-semibold">Pokémon: 1/5</p>
             </div>
@@ -222,6 +244,9 @@
                 <canvas id="statChart" class="mb-2 mx-auto"></canvas>
             </div>
             <div class="flex flex-col items-center justify-center space-y-4 mx-auto">
+                <!-- Move message above the input box -->
+                <p id="message" class="text-lg text-center font-semibold">Guess the Pokémon!</p>
+                
                 <input id="guessInput" type="text" placeholder="Enter Pokémon name" class="border p-2 rounded w-64" list="pokemon-list">
                 <datalist id="pokemon-list">
                     <!-- Options will be added by JavaScript -->
@@ -247,6 +272,7 @@ let currentPokemon = null;
 let pokemonQueue = [];
 let currentPokemonIndex = 0;
 let totalGuesses = 0;
+let totalSkips = 0; // Add skip tracking variable
 let currentBlur = 30; // Changed from 35 to 30
 let myChart = null;
 let gameMode = '';
@@ -335,6 +361,7 @@ async function startGame(mode) {
     // Reset game state
     currentPokemonIndex = 0;
     totalGuesses = 0;
+    totalSkips = 0; // Add this line
     pokemonQueue = [];
     
     try {
@@ -496,7 +523,7 @@ async function loadPokemon(index) {
     
     // Clear input and set initial message and hints
     guessInput.value = '';
-    message.textContent = 'Guess the Pokémon!';
+    message.textContent = 'Guess the Pokémon!'; // Reset to default white
     document.getElementById('typeHint').innerHTML = '<span style="color: #9ca3af;">Type(s): ???</span>';
     document.getElementById('abilityHint').innerHTML = '<span style="color: #9ca3af;">Ability: ???</span>';
     
@@ -507,7 +534,7 @@ async function loadPokemon(index) {
     guessInput.focus();
 }
 
-// Create chart
+// Create chart with horizontal animation
 function createChart(stats, pokemonName) {
     if (myChart) myChart.destroy();
     
@@ -535,6 +562,16 @@ function createChart(stats, pokemonName) {
             responsive: true,
             maintainAspectRatio: false,
             indexAxis: 'y',
+            animation: {
+                duration: 1200, // Animation duration in milliseconds
+                easing: 'easeOutQuart', // Smooth easing
+                // Animate only the x-axis (horizontal growth)
+                x: {
+                    from: 0, // Start from 0 width
+                    duration: 1200,
+                    easing: 'easeOutQuart'
+                }
+            },
             scales: {
                 x: {
                     beginAtZero: true,
@@ -592,7 +629,8 @@ function checkGuess() {
     const guess = guessInput.value.trim().toLowerCase();
     
     if (guess === currentPokemon.name) {
-        message.textContent = `Correct! It's ${currentPokemon.name.charAt(0).toUpperCase() + currentPokemon.name.slice(1)}!`;
+        // Green color for correct answer
+        message.innerHTML = `<span style="color: #10b981;">Correct! It's ${currentPokemon.name.charAt(0).toUpperCase() + currentPokemon.name.slice(1)}!</span>`;
         pokemonSprite.classList.remove('blurred-grey');
         pokemonSprite.style.filter = 'none';
         pokemonSprite.style.width = '300px';
@@ -616,8 +654,8 @@ function checkGuess() {
         const abilityHint = currentPokemon.abilities[0].ability.name.charAt(0).toUpperCase() + currentPokemon.abilities[0].ability.name.slice(1);
         const typeHint = currentPokemon.types.map(t => t.type.name.charAt(0).toUpperCase() + t.type.name.slice(1)).join(', ');
 
-        // Update message and hints based on incorrect guess count
-        message.textContent = 'Incorrect.';
+        // Red color for incorrect answer
+        message.innerHTML = `<span style="color: #ef4444;">Incorrect.</span>`;
         
         if (incorrectGuesses === 2) {
             document.getElementById('typeHint').textContent = `Type(s): ${typeHint}`;
@@ -650,8 +688,10 @@ function nextPokemon() {
 
 // Skip Pokemon
 function skipPokemon() {
-    // Reveal the Pokemon and show correct answer
-    message.textContent = `Skipped! It was ${currentPokemon.name.charAt(0).toUpperCase() + currentPokemon.name.slice(1)}!`;
+    totalSkips++; // Add this line to track skips
+    
+    // Orange color for skipped Pokemon
+    message.innerHTML = `<span style="color: #f97316;">Skipped! It was ${currentPokemon.name.charAt(0).toUpperCase() + currentPokemon.name.slice(1)}!</span>`;
     pokemonSprite.classList.remove('blurred-grey');
     pokemonSprite.style.filter = 'none';
     
@@ -688,12 +728,103 @@ function previousPokemon() {
 
 // End game
 function endGame() {
-    message.textContent = `Game complete! Total guesses: ${totalGuesses}`;
+    if (gameMode === 'daily') {
+        const score = calculateScore();
+        const rank = getScoreRank(score);
+        
+        message.innerHTML = `
+            <div class="text-center space-y-2">
+                <div class="text-xl font-bold text-green-400">Daily Challenge Complete!</div>
+                <div class="text-lg">🎯 Score: ${score}/1000</div>
+                <div class="text-md">${rank}</div>
+                <div class="text-sm text-gray-300">Total Guesses: ${totalGuesses}</div>
+                <div class="text-sm text-gray-300">Skips: ${totalSkips}</div>
+            </div>
+        `;
+        
+        // Create share button
+        const shareButton = document.createElement('button');
+        shareButton.textContent = '📤 Share Results';
+        shareButton.className = 'bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 mt-4 mb-4';
+        shareButton.onclick = async () => {
+            const shareText = generateShareText(score);
+            const copied = await copyToClipboard(shareText);
+            if (copied) {
+                shareButton.textContent = '✅ Copied!';
+                shareButton.className = 'bg-green-600 text-white px-4 py-2 rounded mt-4 mb-4';
+                setTimeout(() => {
+                    shareButton.textContent = '📤 Share Results';
+                    shareButton.className = 'bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 mt-4 mb-4';
+                }, 2000);
+            }
+        };
+        
+        // Insert share button above the input box
+        const inputContainer = document.querySelector('#gameScreen .flex.flex-col.items-center.justify-center.space-y-4');
+        const messageElement = document.getElementById('message');
+        inputContainer.insertBefore(shareButton, messageElement.nextSibling);
+        
+    } else {
+        message.textContent = `Infinite Quiz Complete! Total guesses: ${totalGuesses}`;
+    }
+    
     guessButton.classList.add('hidden');
     nextButton.classList.add('hidden');
+    skipButton.classList.add('hidden');
+    previousButton.classList.add('hidden');
     restartButton.classList.remove('hidden');
     pokemonSprite.style.display = 'none';
     if (myChart) myChart.destroy();
+}
+
+// Calculate score based on guesses
+function calculateScore() {
+    const maxScore = 1000;
+    const perfectGuesses = pokemonQueue.length; // 1 guess per Pokemon = perfect
+    const guessPenalty = Math.max(0, totalGuesses - perfectGuesses) * 50; // 50 points per extra guess
+    const skipPenalty = totalSkips * 150; // 150 points per skip
+    const score = Math.max(0, maxScore - guessPenalty - skipPenalty);
+    return score;
+}
+
+// Generate shareable text
+function generateShareText(score) {
+    const today = new Date().toLocaleDateString();
+    const efficiency = Math.round((pokemonQueue.length / totalGuesses) * 100);
+    
+    return `🎮 BST Guesser Daily Challenge - ${today}
+🎯 Score: ${score}/1000
+📊 Guesses: ${totalGuesses}/${pokemonQueue.length * 3} (${efficiency}% efficiency)
+⏭️ Skips: ${totalSkips}
+🏆 ${getScoreRank(score)}
+
+Can you beat my score? Play at: ${window.location.href}`;
+}
+
+// Get rank based on score
+function getScoreRank(score) {
+    if (score >= 950) return "Pokémon Master! 🥇";
+    if (score >= 850) return "Expert Trainer! 🥈";
+    if (score >= 700) return "Skilled Trainer! 🥉";
+    if (score >= 500) return "Novice Trainer 📚";
+    return "Keep Training! 💪";
+}
+
+// Copy to clipboard
+async function copyToClipboard(text) {
+    try {
+        await navigator.clipboard.writeText(text);
+        return true;
+    } catch (err) {
+        // Fallback for older browsers
+        const textArea = document.createElement('textarea');
+        textArea.value = text;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+        return true;
+    }
 }
 
 // Return to menu
