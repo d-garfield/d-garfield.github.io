@@ -100,6 +100,8 @@
             position: relative;
             bottom: 0;
             width: 100%;
+            min-height: 250px; /* Set a minimum height for the footer */
+            flex-shrink: 0; /* Prevent footer from shrinking */
         }
         /* Center main title with nice border */
         .main-title {
@@ -120,8 +122,9 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            min-height: calc(100vh - 200px);
+            min-height: calc(100vh - 250px); /* Reserve space for footer */
             width: 100%;
+            padding: 20px 0; /* Add some padding */
         }
 
         /* Ensure home menu is properly centered */
@@ -136,7 +139,7 @@
             width: 100%;
             max-width: 1200px;
             margin: 0 auto;
-            padding: 0 16px; /* Add padding for mobile */
+            padding: 20px 16px;
         }
 
         /* Add this to your existing <style> section */
@@ -226,7 +229,7 @@
             width: 100%;
             max-width: 1200px;
             margin: 0 auto;
-            padding: 0 16px; /* Add padding for mobile */
+            padding: 20px 16px;
         }
 
         /* Responsive flex layout */
@@ -350,6 +353,26 @@
             .logo-container .main-title {
                 font-size: 1.8rem !important;
             }
+        }
+
+        /* Simple sticky footer fix */
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .main-content {
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 60vh; /* Ensure minimum content height */
+        }
+
+        footer {
+            margin-top: auto;
+            flex-shrink: 0;
         }
     </style>
 </head>
