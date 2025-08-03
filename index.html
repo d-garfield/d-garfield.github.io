@@ -1,4 +1,12 @@
-<script type="text/javascript">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BST Guesser</title>
+    
+    <!-- Move XLSX script here, after DOCTYPE -->
+    <script type="text/javascript">
         var gk_isXlsx = false;
         var gk_xlsxFileLookup = {};
         var gk_fileData = {};
@@ -11,23 +19,15 @@
                 var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
                 var firstSheetName = workbook.SheetNames[0];
                 var worksheet = workbook.Sheets[firstSheetName];
-
-                // Convert sheet to JSON to filter blank rows
                 var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
-                // Filter out blank rows (rows where all cells are empty, null, or undefined)
                 var filteredData = jsonData.filter(row => row.some(filledCell));
-
-                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
                 var headerRowIndex = filteredData.findIndex((row, index) =>
                   row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
                 );
-                // Fallback
                 if (headerRowIndex === -1 || headerRowIndex > 25) {
                   headerRowIndex = 0;
                 }
-
-                // Convert filtered JSON back to CSV
-                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex));
                 csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
                 return csv;
             } catch (e) {
@@ -37,445 +37,601 @@
         }
         return gk_fileData[filename] || "";
         }
-        </script><!DOCTYPE html>
-<html lang="en">
+    </script>
     
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BST Guesser</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
     <meta name="google-adsense-account" content="ca-pub-2677128924988240">
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@3.3.0/dist/tailwind.min.css" rel="stylesheet">
+    
+    <!-- Use alternative Tailwind CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    
     <style>
         body {
-            font-family: 'Arial', sans-serif;
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #0f1729 !important; /* Darker, more faded blue background */
+            color: white !important; /* White text */
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
         canvas {
-            max-width: 450px; /* Reduced from 600px */
+            max-width: 450px;
             margin: 0 auto;
-            height: 300px !important; /* Reduced from 350px */
+            height: 300px !important;
         }
         #pokemonSprite {
-            max-width: 150px;
+            max-width: 300px !important;
+            width: 300px !important; /* Force a fixed width instead of 100% */
+            height: auto;
             margin-bottom: 1rem;
+            display: block; /* Ensure consistent display */
         }
         .blurred-grey {
-            filter: blur(15px) grayscale(100%);
+            filter: blur(30px) grayscale(100%); /* Changed from 35px to 30px */
         }
         #statChart {
-    display: block;
-    margin-left: 0;
-}
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        /* Override any dark text */
+        p, h1, h2, h3, label, summary {
+            color: white !important;
+        }
+        /* Style the footer as static at bottom */
+        footer {
+            background-color: #1e40af !important;
+            margin-top: auto;
+            position: relative;
+            bottom: 0;
+            width: 100%;
+        }
+        /* Center main title with nice border */
+        .main-title {
+            text-align: center;
+            font-weight: 700;
+            letter-spacing: -0.025em;
+            border: 3px solid #60a5fa;
+            border-radius: 12px;
+            padding: 16px 24px;
+            background: linear-gradient(135deg, rgba(96, 165, 250, 0.1), rgba(147, 197, 253, 0.1));
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin: 0 auto;
+            display: inline-block;
+        }
+        /* Main content wrapper */
+        .main-content {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: calc(100vh - 200px);
+            width: 100%;
+        }
+
+        /* Ensure home menu is properly centered */
+        #homeMenu {
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* Ensure game screen is properly centered */
+        #gameScreen {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Add this to your existing <style> section */
+        #guessInput {
+            color: black !important;
+            background-color: white !important;
+        }
+
+        /* Also style the datalist options */
+        #pokemon-list option {
+            color: black;
+            background-color: white;
+        }
+
+        /* Loading spinner */
+        .loading-spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 4px solid #60a5fa;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+        }
     </style>
 </head>
-<body class="bg-gray-100 flex items-center justify-center min-h-screen min-w-screen">
-    <div id="homeMenu" class="flex flex-col items-center justify-center space-y-4 mx-auto">
-        <h1 class="text-3xl font-bold mb-4">BST Guesser</h1>
-        <div class="flex items-center space-x-4">
-            <label for="fullyEvolvedToggle" class="text-lg font-semibold">Only Fully Evolved Pokémon</label>
-            <input id="fullyEvolvedToggle" type="checkbox" class="h-5 w-5">
+<body style="background-color: #0f1729;">
+    <div class="main-content">
+        <div id="homeMenu" class="flex flex-col items-center justify-center space-y-4 mx-auto">
+            <h1 class="main-title text-4xl font-bold mb-6 text-white">BST Guesser</h1>
+            <div class="flex items-center space-x-4">
+                <label for="fullyEvolvedToggle" class="text-lg font-semibold">Only Fully Evolved Pokémon</label>
+                <input id="fullyEvolvedToggle" type="checkbox" class="h-5 w-5">
+            </div>
+            <button id="dailyChallengeButton" class="bg-blue-500 text-white px-6 py-3 rounded hover:bg-blue-600 text-lg">Daily Challenge</button>
+            <button id="infiniteModeButton" class="bg-purple-500 text-white px-6 py-3 rounded hover:bg-purple-600 text-lg">Infinite Quiz</button>
         </div>
-        <button id="dailyChallengeButton" class="bg-blue-500 text-white px-6 py-3 rounded hover:bg-blue-600 text-lg">Daily Challenge</button>
-        <button id="infiniteModeButton" class="bg-purple-500 text-white px-6 py-3 rounded hover:bg-purple-600 text-lg">Infinite Quiz</button>
-    </div>
-    <div id="gameScreen" class="hidden flex flex-col items-center justify-center w-full mx-auto">
-        <h1 id="gameTitle" class="text-3xl font-bold mb-4 mx-auto"></h1>
-        <div class="mb-4 mx-auto">
-            <p id="message" class="text-lg text-center"></p>
-            <p id="guesses" class="text-lg text-center font-semibold">Total Guesses: 0</p>
-            <p id="progress" class="text-lg text-center font-semibold">Pokémon: 1/5</p>
-        </div>
-        <div class="flex flex-col lg:flex-row items-center justify-center lg:space-x-4 w-full max-w-4xl mx-auto">
-            <img id="pokemonSprite" alt="Pokémon Sprite" class="blurred-grey mx-auto" />
-            <canvas id="statChart" class="mb-2 mx-auto"></canvas>
-        </div>
-        <div class="flex flex-col items-center justify-center space-y-4 mx-auto">
-            <input id="guessInput" type="text" placeholder="Enter Pokémon name" class="border p-2 rounded w-64" list="pokemon-list">
-<datalist id="pokemon-list">
-    <!-- Options will be added by JavaScript -->
-</datalist>
-            <div class="flex flex-row items-center justify-center space-x-2 mt-2">
-        <button id="guessButton" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Submit Guess</button>
-        <button id="nextButton" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">Next Pokémon</button>
-        <button id="restartButton" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 hidden">Restart Challenge</button>
-        <button id="returnToMenuButton" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">Return to Menu</button>
-    </div>
-        </div>
-    </div>
-    <footer class="w-full bg-gray-200 py-4 mt-8 flex flex-col items-center justify-center text-center text-sm">
-    <div class="max-w-2xl px-4 w-full">
-        <details class="mb-2">
-            <summary class="cursor-pointer font-semibold">Privacy Policy</summary>
-            <p class="mt-2">
-                This website does not collect personal information. Third-party services (such as ad networks) may use cookies for analytics and advertising.
-            </p>
-        </details>
-        <details>
-            <summary class="cursor-pointer font-semibold">Terms of Service</summary>
-            <p class="mt-2">
-                By using this site, you agree to use it for entertainment purposes only. All Pokémon data is provided by the PokéAPI BST Guesser is not affiliated with Nintendo and does not own or claim any rights to any Nintendo trademark or the Pokémon trademark, and all references to such are used for commentary and informational purposes only.
-            </p>
-        </details>
-
-        <!--  Footer AdSense Ad 
-        <div class="my-4 flex justify-center">
-            <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
-            <ins class="adsbygoogle"
-                 style="display:block"
-                 data-ad-client="ca-pub-2677128924988240"
-                 data-ad-slot="1234567890"
-                 data-ad-format="auto"></ins>
-            <script>
-                 (adsbygoogle = window.adsbygoogle || []).push({});
-            </script>
-        </div>-->
-
-        <p class="mt-4 text-gray-500">&copy; 2025 BST Guesser</p>
-    </div>
-</footer>
-    <script>
-        // Register the datalabels plugin
-        Chart.register(ChartDataLabels);
-
-        const statChart = document.getElementById('statChart').getContext('2d');
-        const guessInput = document.getElementById('guessInput');
-        const guessButton = document.getElementById('guessButton');
-        const nextButton = document.getElementById('nextButton');
-        const restartButton = document.getElementById('restartButton');
-        const returnToMenuButton = document.getElementById('returnToMenuButton');
-        const dailyChallengeButton = document.getElementById('dailyChallengeButton');
-        const infiniteModeButton = document.getElementById('infiniteModeButton');
-        const fullyEvolvedToggle = document.getElementById('fullyEvolvedToggle');
-        const message = document.getElementById('message');
-        const guessesDisplay = document.getElementById('guesses');
-        const progressDisplay = document.getElementById('progress');
-        const pokemonSprite = document.getElementById('pokemonSprite');
-        const homeMenu = document.getElementById('homeMenu');
-        const gameScreen = document.getElementById('gameScreen');
-        const gameTitle = document.getElementById('gameTitle');
-        const hints = document.getElementById('hints');
-        let currentPokemon = null;
-        let myChart = null;
-        let totalGuesses = 0;
-        let currentIndex = 0;
-        let dailyPokemonIds = [];
-        let currentBlur = 15;
-        let gameMode = null;
-        let incorrectGuesses = 0;
-
-        // List of fully evolved Pokémon IDs (subset for brevity, up to Gen 8)
-        const fullyEvolvedPokemonIds = [
-            3, 6, 9, 12, 15, 18, 20, 22, 24, 26, 28, 31, 34, 36, 38, 40, 45, 47, 49,
-            55, 57, 59, 62, 65, 68, 71, 73, 76, 78, 80, 82, 83, 85, 87, 89, 91, 94,
-            99, 101, 103, 105, 108, 110, 112, 113, 115, 117, 119, 121, 122, 124, 126,
-            127, 128, 130, 131, 132, 134, 135, 136, 137, 139, 141, 142, 143, 145, 146,
-            149, 150, 151, 154, 157, 160, 162, 164, 166, 168, 169, 171, 178, 181, 182,
-            184, 186, 189, 192, 195, 197, 199, 201, 202, 203, 205, 206, 208, 210, 212,
-            214, 217, 219, 222, 224, 226, 227, 229, 230, 232, 241, 242, 248, 254, 257,
-            260, 262, 264, 267, 269, 272, 275, 277, 279, 282, 284, 286, 289, 291, 292,
-            295, 297, 301, 302, 303, 306, 308, 310, 311, 312, 313, 314, 317, 319, 321,
-            323, 324, 326, 327, 330, 332, 334, 335, 336, 338, 340, 342, 344, 346, 348,
-            350, 351, 352, 354, 357, 358, 359, 362, 365, 367, 368, 369, 373, 376, 389,
-            392, 395, 398, 400, 402, 405, 407, 409, 411, 413, 414, 416, 419, 421, 423,
-            424, 426, 428, 429, 430, 432, 435, 437, 441, 442, 444, 445, 448, 450, 452,
-            454, 455, 457, 460, 461, 462, 464, 465, 466, 467, 468, 470, 471, 473, 474,
-            475, 477, 497, 500, 503, 505, 508, 510, 512, 514, 516, 518, 521, 523, 526,
-            528, 530, 531, 534, 537, 538, 539, 542, 545, 547, 549, 550, 553, 555, 558,
-            560, 561, 563, 565, 567, 569, 571, 573, 576, 579, 581, 584, 586, 587, 589,
-            591, 593, 594, 596, 598, 601, 604, 606, 609, 612, 614, 615, 617, 618, 620,
-            621, 623, 625, 626, 628, 630, 631, 632, 635, 649, 652, 655, 657, 660, 663,
-            666, 668, 671, 673, 675, 676, 678, 680, 681, 683, 685, 687, 689, 691, 694,
-            697, 699, 700, 701, 703, 706, 707, 709, 711, 714, 716, 717, 719, 724, 727,
-            730, 733, 735, 738, 740, 741, 743, 745, 746, 748, 750, 752, 754, 757, 759,
-            761, 763, 764, 765, 766, 768, 770, 771, 774, 775, 776, 777, 778, 779, 780,
-            781, 784, 791, 792, 794, 795, 797, 798, 799, 800, 801, 802, 803, 804, 805,
-            806, 807, 809, 812, 815, 818, 823, 826, 829, 831, 833, 836, 838, 841, 842,
-            844, 845, 847, 849, 851, 853, 855, 857, 858, 860, 861, 862, 863, 865, 866,
-            867, 868, 869, 870, 871, 872, 874, 875, 876, 877, 878, 879, 880, 881, 882,
-            883, 884, 885, 886, 887, 888, 889, 890, 891, 892, 893, 894, 895, 896, 897,
-            898
-        ];
-
-        // Simple hash function for date-based seed
-        function simpleHash(str) {
-            let hash = 0;
-            for (let i = 0; i < str.length; i++) {
-                hash = ((hash << 5) - hash) + str.charCodeAt(i);
-                hash = hash & hash;
-            }
-            return Math.abs(hash);
-        }
-
-        // Generate 5 Pokémon IDs for daily challenge
-        function generateDailyPokemonIds() {
-            const today = new Date().toISOString().split('T')[0];
-            const seed = simpleHash(today);
-            const ids = [];
-            let currentSeed = seed;
-            const pool = fullyEvolvedToggle.checked ? fullyEvolvedPokemonIds : Array.from({ length: 898 }, (_, i) => i + 1);
-            for (let i = 0; i < 5; i++) {
-                currentSeed = (currentSeed * 9301 + 49297) % 233280;
-                const index = currentSeed % pool.length;
-                ids.push(pool[index]);
-            }
-            return ids;
-        }
-
-        async function fetchPokemon(id) {
-            try {
-                const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}`);
-                const data = await response.json();
-                return data;
-            } catch (error) {
-                console.error('Error fetching Pokémon:', error);
-                return null;
-            }
-        }
-
-        function getGradientColor(value) {
-            const maxBlue = 200;
-            const ratio = Math.min(value / maxBlue, 1);
-            let r, g, b;
-
-            const colorStops = [
-                { value: 0, r: 255, g: 0, b: 0 },
-                { value: 0.25, r: 255, g: 165, b: 0 },
-                { value: 0.5, r: 255, g: 255, b: 0 },
-                { value: 0.75, r: 0, g: 255, b: 0 },
-                { value: 1, r: 0, g: 0, b: 255 }
-            ];
-
-            for (let i = 0; i < colorStops.length - 1; i++) {
-                const start = colorStops[i];
-                const end = colorStops[i + 1];
-                if (ratio >= start.value && ratio <= end.value) {
-                    const segmentRatio = (ratio - start.value) / (end.value - start.value);
-                    r = Math.round(start.r + (end.r - start.r) * segmentRatio);
-                    g = Math.round(start.g + (end.g - start.g) * segmentRatio);
-                    b = Math.round(start.b + (end.b - start.b) * segmentRatio);
-                    return `rgba(${r}, ${g}, ${b}, 0.6)`;
-                }
-            }
-
-            return `rgba(0, 0, 255, 0.6)`;
-        }
-
-        function createChart(stats, pokemonName) {
-            if (myChart) myChart.destroy();
-            const statLabels = ['HP', 'Attack', 'Defense', 'Sp. Atk', 'Sp. Def', 'Speed'];
-            const statValues = stats.map(stat => stat.base_stat);
-            const totalStat = statValues.reduce((sum, val) => sum + val, 0);
-            const backgroundColors = statValues.map(value => getGradientColor(value));
-            const borderColors = statValues.map(value => getGradientColor(value).replace('0.6', '1'));
-
-            myChart = new Chart(statChart, {
-                type: 'bar',
-                data: {
-                    labels: statLabels,
-                    datasets: [{
-                        label: `Base Stat Total: ${totalStat}`,
-                        data: statValues,
-                        backgroundColor: backgroundColors,
-                        borderColor: borderColors,
-                        borderWidth: 1,
-                        barThickness: 25
-                    }]
-                },
-                options: {
-                    devicePixelRatio: window.devicePixelRatio || 2,
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    indexAxis: 'y',
-                    scales: {
-                        x: {
-                            beginAtZero: true,
-                            max: 255,
-                            display: false
-                        },
-                        y: {
-                            title: {
-                                display: false
-                            },
-                            ticks: {
-                                font: {
-                                    size: 13
-                                },
-                                padding: 5
-                            }
-                        }
-                    },
-                    plugins: {
-                        legend: {
-                            display: true
-                        },
-                        datalabels: {
-                            anchor: 'end',
-                            align: 'end',
-                            formatter: (value) => value,
-                            color: 'black',
-                            font: {
-                                weight: 'bold'
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-        async function loadPokemon(index) {
-            if (gameMode === 'daily' && index >= 5) {
-                message.textContent = `Challenge complete! Total guesses: ${totalGuesses}.`;
-                guessButton.classList.add('hidden');
-                nextButton.classList.add('hidden');
-                restartButton.classList.remove('hidden');
-                pokemonSprite.style.display = 'none';
-                guessInput.disabled = true;
-                return;
-            }
-            const pool = fullyEvolvedToggle.checked ? fullyEvolvedPokemonIds : Array.from({ length: 898 }, (_, i) => i + 1);
-            const pokemonId = gameMode === 'daily' ? dailyPokemonIds[index] : pool[Math.floor(Math.random() * pool.length)];
-            currentPokemon = await fetchPokemon(pokemonId);
-            if (currentPokemon) {
-                createChart(currentPokemon.stats, currentPokemon.name);
-                message.textContent = 'Guess the Pokémon based on its BST';
-                guessInput.value = '';
-                currentBlur = 15;
-                pokemonSprite.style.filter = `blur(${currentBlur}px) grayscale(100%)`;
-                pokemonSprite.classList.add('blurred-grey');
-                pokemonSprite.src = currentPokemon.sprites.front_default;
-                pokemonSprite.style.display = 'block';
-                progressDisplay.textContent = gameMode === 'daily' ? `Pokémon: ${index + 1}/5` : `Pokémon: ${currentIndex + 1}`;
-                guessInput.focus();
-            } else {
-                message.textContent = 'Failed to load Pokémon. Try again!';
-                pokemonSprite.style.display = 'none';
-            }
-            incorrectGuesses = 0;
-        }
-
-        function checkGuess() {
-            totalGuesses++;
-            guessesDisplay.textContent = `Total Guesses: ${totalGuesses}`;
-            const guess = guessInput.value.trim().toLowerCase();
-            if (guess === currentPokemon.name) {
-                message.textContent = `Correct! It's ${currentPokemon.name.charAt(0).toUpperCase() + currentPokemon.name.slice(1)}!`;
-                pokemonSprite.classList.remove('blurred-grey');
-                pokemonSprite.style.filter = 'none';
-                guessButton.classList.add('hidden');
-                nextButton.classList.remove('hidden');
-                document.getElementById('hints').innerHTML = '';
-            } else {
-                incorrectGuesses++;
-                currentBlur = Math.max(currentBlur - 3, 0);
-                pokemonSprite.style.filter = `blur(${currentBlur}px) grayscale(100%)`;
-
-                // Get ability
-                const abilityHint = currentPokemon.abilities[0].ability.name.charAt(0).toUpperCase() + currentPokemon.abilities[0].ability.name.slice(1);
-
-                // Get types
-                const typeHint = currentPokemon.types.map(t => t.type.name.charAt(0).toUpperCase() + t.type.name.slice(1)).join(', ');
-
-                if (incorrectGuesses === 1) {
-                    message.innerHTML = `Incorrect.<br>Hints coming next!`;
-                } else if (incorrectGuesses === 2) {
-                    message.innerHTML = `Incorrect.<br>Ability: ${abilityHint}`;
-                } else {
-                    // After 2nd incorrect guess, keep showing both hints
-                    message.innerHTML = `Incorrect.<br>Ability: ${abilityHint}<br>Type(s): ${typeHint}`;
-                }
-            }
-            guessInput.value = '';
-            guessInput.focus();
-        }
         
+        <!-- Add loading screen -->
+        <div id="loadingScreen" class="hidden loading-container">
+            <div class="loading-spinner"></div>
+            <p class="text-lg text-white">Loading Pokémon...</p>
+        </div>
+        
+        <div id="gameScreen" class="hidden flex flex-col items-center justify-center w-full mx-auto">
+            <h1 id="gameTitle" class="main-title text-3xl font-bold mb-4 mx-auto text-white text-center"></h1>
+            <div class="mb-4 mx-auto">
+                <p id="message" class="text-lg text-center"></p>
+                <p id="guesses" class="text-lg text-center font-semibold">Total Guesses: 0</p>
+                <p id="progress" class="text-lg text-center font-semibold">Pokémon: 1/5</p>
+            </div>
+            <div class="flex flex-col lg:flex-row items-center justify-center lg:space-x-4 w-full max-w-4xl mx-auto">
+                <div class="flex flex-col items-center">
+                    <img id="pokemonSprite" alt="Pokémon Sprite" class="blurred-grey mx-auto" />
+                    <!-- Add hints section below the sprite -->
+                    <div id="hints" class="text-center mt-4">
+                        <p id="typeHint" class="text-lg"><span style="color: #9ca3af;">Type(s): ???</span></p>
+                        <p id="abilityHint" class="text-lg"><span style="color: #9ca3af;">Ability: ???</span></p>
+                    </div>
+                </div>
+                <canvas id="statChart" class="mb-2 mx-auto"></canvas>
+            </div>
+            <div class="flex flex-col items-center justify-center space-y-4 mx-auto">
+                <input id="guessInput" type="text" placeholder="Enter Pokémon name" class="border p-2 rounded w-64" list="pokemon-list">
+                <datalist id="pokemon-list">
+                    <!-- Options will be added by JavaScript -->
+                </datalist>
+                <div class="flex flex-row items-center justify-center space-x-2 mt-2">
+                    <button id="returnToMenuButton" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">Return to Menu</button>
+                    <button id="nextButton" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">Next Pokémon</button>
+                    <button id="restartButton" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 hidden">Restart Challenge</button>
+                    <button id="guessButton" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Submit Guess</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Your existing footer and script code -->
+    <script>
+// Game variables
+let currentPokemon = null;
+let pokemonQueue = [];
+let currentPokemonIndex = 0;
+let totalGuesses = 0;
+let currentBlur = 30; // Changed from 35 to 30
+let myChart = null;
+let gameMode = '';
+let incorrectGuesses = 0;
 
-        function startDailyChallenge() {
-            gameMode = 'daily';
-            dailyPokemonIds = generateDailyPokemonIds();
-            currentIndex = 0;
-            totalGuesses = 0;
-            guessesDisplay.textContent = `Total Guesses: ${totalGuesses}`;
-            progressDisplay.classList.remove('hidden');
-            guessButton.classList.remove('hidden');
-            nextButton.classList.add('hidden');
-            restartButton.classList.add('hidden');
-            guessInput.disabled = false;
-            homeMenu.classList.add('hidden');
-            gameScreen.classList.remove('hidden');
-            gameTitle.textContent = 'Daily Challenge';
-            loadPokemon(currentIndex);
-        }
+// DOM elements
+const dailyChallengeButton = document.getElementById('dailyChallengeButton');
+const infiniteModeButton = document.getElementById('infiniteModeButton');
+const homeMenu = document.getElementById('homeMenu');
+const gameScreen = document.getElementById('gameScreen');
+const gameTitle = document.getElementById('gameTitle');
+const returnToMenuButton = document.getElementById('returnToMenuButton');
+const pokemonSprite = document.getElementById('pokemonSprite');
+const statChart = document.getElementById('statChart');
+const guessInput = document.getElementById('guessInput');
+const guessButton = document.getElementById('guessButton');
+const nextButton = document.getElementById('nextButton');
+const restartButton = document.getElementById('restartButton');
+const message = document.getElementById('message');
+const guessesDisplay = document.getElementById('guesses');
+const progressDisplay = document.getElementById('progress');
+const fullyEvolvedToggle = document.getElementById('fullyEvolvedToggle');
+const loadingScreen = document.getElementById('loadingScreen');
 
-        function startInfiniteMode() {
-            gameMode = 'infinite';
-            currentIndex = 0;
-            totalGuesses = 0;
-            guessesDisplay.textContent = `Total Guesses: ${totalGuesses}`;
-            progressDisplay.classList.remove('hidden');
-            guessButton.classList.remove('hidden');
-            nextButton.classList.add('hidden');
-            restartButton.classList.add('hidden');
-            guessInput.disabled = false;
-            homeMenu.classList.add('hidden');
-            gameScreen.classList.remove('hidden');
-            gameTitle.textContent = 'Infinite mode';
-            loadPokemon(currentIndex);
-        }
+// Pokemon names for autocomplete
+const allPokemonNames = [];
 
-        function returnToMenu() {
-            homeMenu.classList.remove('hidden');
-            gameScreen.classList.add('hidden');
-            if (myChart) myChart.destroy();
-            pokemonSprite.style.display = 'none';
-            gameMode = null;
-        }
+// Event listeners
+dailyChallengeButton.addEventListener('click', () => startGame('daily'));
+infiniteModeButton.addEventListener('click', () => startGame('infinite'));
+returnToMenuButton.addEventListener('click', returnToMenu);
+guessButton.addEventListener('click', checkGuess);
+nextButton.addEventListener('click', nextPokemon);
+restartButton.addEventListener('click', () => startGame(gameMode));
 
-        dailyChallengeButton.addEventListener('click', startDailyChallenge);
-        infiniteModeButton.addEventListener('click', startInfiniteMode);
-        guessButton.addEventListener('click', checkGuess);
-        nextButton.addEventListener('click', () => {
-            currentIndex++;
-            loadPokemon(currentIndex);
-        });
-        restartButton.addEventListener('click', startDailyChallenge);
-        returnToMenuButton.addEventListener('click', returnToMenu);
-        guessInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') checkGuess();
-        });
-
-        // Show home menu initially
-        homeMenu.classList.remove('hidden');
-        gameScreen.classList.add('hidden');
-
-        const allPokemonNames = [
-    "Bulbasaur", "Ivysaur", "Venusaur", "Charmander", "Charmeleon", "Charizard",
-    
-];
-
-        // Populate datalist
-        const datalist = document.getElementById('pokemon-list');
-        allPokemonNames.forEach(name => {
-    const option = document.createElement('option');
-    option.value = name;
-    datalist.appendChild(option);
+// Enter key support
+guessInput.addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        checkGuess();
+    }
 });
 
-// Auto complete fetch
-fetch('https://pokeapi.co/api/v2/pokemon?limit=1025')
-  .then(response => response.json())
-  .then(data => {
-    const datalist = document.getElementById('pokemon-list');
-    datalist.innerHTML = ""; // Clear any old options
-    data.results.forEach(p => {
-      const name = p.name.charAt(0).toUpperCase() + p.name.slice(1);
-      const option = document.createElement('option');
-      option.value = name;
-      datalist.appendChild(option);
+// Initialize autocomplete
+async function initializeAutocomplete() {
+    try {
+        const response = await fetch('https://pokeapi.co/api/v2/pokemon?limit=1025');
+        const data = await response.json();
+        const datalist = document.getElementById('pokemon-list');
+        datalist.innerHTML = "";
+        data.results.forEach(p => {
+            const name = p.name.charAt(0).toUpperCase() + p.name.slice(1);
+            allPokemonNames.push(name.toLowerCase());
+            const option = document.createElement('option');
+            option.value = name;
+            datalist.appendChild(option);
+        });
+    } catch (error) {
+        console.error('Error loading Pokemon names:', error);
+    }
+}
+
+// Start game
+async function startGame(mode) {
+    gameMode = mode;
+    
+    // Show loading screen, hide other screens
+    homeMenu.classList.add('hidden');
+    gameScreen.classList.add('hidden');
+    loadingScreen.classList.remove('hidden');
+    
+    if (mode === 'daily') {
+        gameTitle.textContent = 'Daily Challenge';
+    } else {
+        gameTitle.textContent = 'Infinite Quiz';
+    }
+    
+    // Reset game state
+    currentPokemonIndex = 0;
+    totalGuesses = 0;
+    pokemonQueue = [];
+    
+    try {
+        // Generate Pokemon queue
+        await generatePokemonQueue();
+        
+        // Load first Pokemon
+        await loadPokemon(0);
+        
+        // Hide loading screen, show game screen
+        loadingScreen.classList.add('hidden');
+        gameScreen.classList.remove('hidden');
+        
+        // Update UI
+        guessButton.classList.remove('hidden');
+        nextButton.classList.add('hidden');
+        restartButton.classList.add('hidden');
+        guessesDisplay.textContent = 'Total Guesses: 0';
+        progressDisplay.textContent = `Pokémon: 1/${pokemonQueue.length}`;
+    } catch (error) {
+        console.error('Error starting game:', error);
+        // Hide loading screen, show home menu on error
+        loadingScreen.classList.add('hidden');
+        homeMenu.classList.remove('hidden');
+    }
+}
+
+// Generate Pokemon queue
+async function generatePokemonQueue() {
+    const onlyFullyEvolved = fullyEvolvedToggle.checked;
+    const queueSize = gameMode === 'daily' ? 5 : 10;
+    
+    let attempts = 0;
+    const maxAttempts = queueSize * 10; // Allow more attempts to find enough Pokemon
+    
+    while (pokemonQueue.length < queueSize && attempts < maxAttempts) {
+        let pokemonId;
+        if (gameMode === 'daily') {
+            // Use seed for daily challenge
+            const today = new Date().toDateString();
+            const seed = hashCode(today + attempts);
+            pokemonId = (Math.abs(seed) % 1025) + 1;
+        } else {
+            pokemonId = Math.floor(Math.random() * 1025) + 1;
+        }
+        
+        try {
+            const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${pokemonId}`);
+            const pokemon = await response.json();
+            
+            // Check if we already have this Pokemon in the queue
+            if (pokemonQueue.some(p => p.id === pokemon.id)) {
+                attempts++;
+                continue;
+            }
+            
+            if (onlyFullyEvolved) {
+                const speciesResponse = await fetch(pokemon.species.url);
+                const species = await speciesResponse.json();
+                const evolutionResponse = await fetch(species.evolution_chain.url);
+                const evolution = await evolutionResponse.json();
+                
+                if (isFullyEvolved(pokemon.name, evolution.chain)) {
+                    pokemonQueue.push(pokemon);
+                }
+            } else {
+                pokemonQueue.push(pokemon);
+            }
+        } catch (error) {
+            console.error('Error fetching Pokemon:', error);
+        }
+        
+        attempts++;
+    }
+    
+    // If we still don't have enough Pokemon, fill with any random ones
+    while (pokemonQueue.length < queueSize) {
+        try {
+            const pokemonId = Math.floor(Math.random() * 1025) + 1;
+            const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${pokemonId}`);
+            const pokemon = await response.json();
+            
+            // Check if we already have this Pokemon
+            if (!pokemonQueue.some(p => p.id === pokemon.id)) {
+                pokemonQueue.push(pokemon);
+            }
+        } catch (error) {
+            console.error('Error fetching fallback Pokemon:', error);
+            break;
+        }
+    }
+}
+
+// Hash function for daily challenge
+function hashCode(str) {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+        const char = str.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash = hash & hash;
+    }
+    return hash;
+}
+
+// Check if Pokemon is fully evolved
+function isFullyEvolved(pokemonName, evolutionChain) {
+    function findInChain(chain) {
+        if (chain.species.name === pokemonName) {
+            return chain.evolves_to.length === 0;
+        }
+        for (let evolution of chain.evolves_to) {
+            const result = findInChain(evolution);
+            if (result !== null) return result;
+        }
+        return null;
+    }
+    return findInChain(evolutionChain);
+}
+
+// Load Pokemon
+async function loadPokemon(index) {
+    if (index >= pokemonQueue.length) {
+        endGame();
+        return;
+    }
+    
+    currentPokemon = pokemonQueue[index];
+    incorrectGuesses = 0;
+    currentBlur = 30; // Changed from 35 to 30
+    
+    // Update sprite
+    pokemonSprite.src = currentPokemon.sprites.front_default;
+    pokemonSprite.classList.add('blurred-grey');
+    pokemonSprite.style.filter = 'blur(30px) grayscale(100%)'; // Changed from 35px to 30px
+    
+    // Create chart
+    createChart(currentPokemon.stats, currentPokemon.name);
+    
+    // Update progress
+    progressDisplay.textContent = `Pokémon: ${index + 1}/${pokemonQueue.length}`;
+    
+    // Clear input and set initial message and hints
+    guessInput.value = '';
+    message.textContent = 'Guess the Pokémon!';
+    document.getElementById('typeHint').innerHTML = '<span style="color: #9ca3af;">Type(s): ???</span>';
+    document.getElementById('abilityHint').innerHTML = '<span style="color: #9ca3af;">Ability: ???</span>';
+    guessInput.focus();
+}
+
+// Create chart
+function createChart(stats, pokemonName) {
+    if (myChart) myChart.destroy();
+    
+    const statLabels = ['HP', 'Attack', 'Defense', 'Sp. Atk', 'Sp. Def', 'Speed'];
+    const statValues = stats.map(stat => stat.base_stat);
+    const totalStat = statValues.reduce((sum, val) => sum + val, 0);
+    const backgroundColors = statValues.map(value => getGradientColor(value));
+    const borderColors = statValues.map(value => getGradientColor(value).replace('0.6', '1'));
+
+    myChart = new Chart(statChart, {
+        type: 'bar',
+        data: {
+            labels: statLabels,
+            datasets: [{
+                label: `Base Stat Total: ${totalStat}`,
+                data: statValues,
+                backgroundColor: backgroundColors,
+                borderColor: borderColors,
+                borderWidth: 1,
+                barThickness: 25
+            }]
+        },
+        options: {
+            devicePixelRatio: window.devicePixelRatio || 2,
+            responsive: true,
+            maintainAspectRatio: false,
+            indexAxis: 'y',
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    max: 255,
+                    display: false
+                },
+                y: {
+                    title: {
+                        display: false
+                    },
+                    ticks: {
+                        color: '#d1d5db', // Light gray color for stat labels
+                        font: {
+                            size: 13
+                        },
+                        padding: 5
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: true,
+                    labels: {
+                        color: '#f3f4f6' // Light color for legend text
+                    }
+                },
+                datalabels: {
+                    anchor: 'end',
+                    align: 'end',
+                    formatter: (value) => value,
+                    color: '#ffffff', // Changed to white for stat value labels
+                    font: {
+                        weight: 'bold'
+                    }
+                }
+            }
+        }
     });
-  });
-    </script>
+}
+
+// Get gradient color for stats
+function getGradientColor(value) {
+    if (value <= 30) return 'rgba(239, 68, 68, 0.6)';
+    if (value <= 60) return 'rgba(249, 115, 22, 0.6)';
+    if (value <= 90) return 'rgba(245, 158, 11, 0.6)';
+    if (value <= 120) return 'rgba(132, 204, 22, 0.6)';
+    if (value <= 150) return 'rgba(34, 197, 94, 0.6)';
+    return 'rgba(16, 185, 129, 0.6)';
+}
+
+// Check guess
+function checkGuess() {
+    totalGuesses++;
+    guessesDisplay.textContent = `Total Guesses: ${totalGuesses}`;
+    const guess = guessInput.value.trim().toLowerCase();
+    
+    if (guess === currentPokemon.name) {
+        message.textContent = `Correct! It's ${currentPokemon.name.charAt(0).toUpperCase() + currentPokemon.name.slice(1)}!`;
+        pokemonSprite.classList.remove('blurred-grey');
+        pokemonSprite.style.filter = 'none';
+        pokemonSprite.style.width = '300px'; // Force the width to stay the same
+        pokemonSprite.style.maxWidth = '300px'; // Ensure max-width stays consistent
+        guessButton.classList.add('hidden');
+        nextButton.classList.remove('hidden');
+    } else {
+        incorrectGuesses++;
+        currentBlur = Math.max(currentBlur - 3, 0);
+        pokemonSprite.style.filter = `blur(${currentBlur}px) grayscale(100%)`;
+
+        // Get ability and type hints
+        const abilityHint = currentPokemon.abilities[0].ability.name.charAt(0).toUpperCase() + currentPokemon.abilities[0].ability.name.slice(1);
+        const typeHint = currentPokemon.types.map(t => t.type.name.charAt(0).toUpperCase() + t.type.name.slice(1)).join(', ');
+
+        // Update message and hints based on incorrect guess count
+        message.textContent = 'Incorrect.';
+        
+        if (incorrectGuesses === 2) {
+            // First hint: reveal TYPE
+            document.getElementById('typeHint').textContent = `Type(s): ${typeHint}`;
+        } else if (incorrectGuesses >= 3) {
+            // Second hint: reveal ABILITY (keep type shown)
+            document.getElementById('typeHint').textContent = `Type(s): ${typeHint}`;
+            document.getElementById('abilityHint').textContent = `Ability: ${abilityHint}`;
+        }
+    }
+    guessInput.value = '';
+    guessInput.focus();
+}
+
+// Next Pokemon
+function nextPokemon() {
+    currentPokemonIndex++;
+    if (currentPokemonIndex >= pokemonQueue.length) {
+        endGame();
+    } else {
+        loadPokemon(currentPokemonIndex);
+        guessButton.classList.remove('hidden');
+        nextButton.classList.add('hidden');
+    }
+}
+
+// End game
+function endGame() {
+    message.textContent = `Game complete! Total guesses: ${totalGuesses}`;
+    guessButton.classList.add('hidden');
+    nextButton.classList.add('hidden');
+    restartButton.classList.remove('hidden');
+    pokemonSprite.style.display = 'none';
+    if (myChart) myChart.destroy();
+}
+
+// Return to menu
+function returnToMenu() {
+    gameScreen.classList.add('hidden');
+    loadingScreen.classList.add('hidden');
+    homeMenu.classList.remove('hidden');
+    if (myChart) myChart.destroy();
+    pokemonSprite.style.display = 'block';
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+    initializeAutocomplete();
+    Chart.register(ChartDataLabels);
+});
+</script>
+    
+    <footer class="w-full bg-gray-200 py-4 mt-8 flex flex-col items-center justify-center text-center text-sm">
+        <div class="max-w-2xl px-4 w-full">
+            <details class="mb-2">
+                <summary class="cursor-pointer font-semibold text-gray-800">Privacy Policy</summary>
+                <p class="mt-2 text-gray-700">
+                    This website does not collect personal information. Third-party services (such as ad networks) may use cookies for analytics and advertising.
+                </p>
+            </details>
+            <details>
+                <summary class="cursor-pointer font-semibold text-gray-800">Terms of Service</summary>
+                <p class="mt-2 text-gray-700">
+                    By using this site, you agree to use it for entertainment purposes only. All Pokémon data is provided by the PokéAPI and is for non-commercial use.
+                </p>
+            </details>
+            
+            <!-- Footer AdSense Ad 
+            <div class="my-4 flex justify-center">
+                <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+                <ins class="adsbygoogle"
+                     style="display:block"
+                     data-ad-client="ca-pub-2677128924988240"
+                     data-ad-slot="1234567890"
+                     data-ad-format="auto"></ins>
+                <script>
+                     (adsbygoogle = window.adsbygoogle || []).push({});
+                </script>
+            </div>-->
+
+            <p class="mt-4 text-gray-500">&copy; 2025 BST Guesser</p>
+        </div>
+    </footer>
 </body>
 </html>
 
