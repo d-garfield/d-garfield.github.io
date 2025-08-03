@@ -447,7 +447,7 @@
 
         const allPokemonNames = [
     "Bulbasaur", "Ivysaur", "Venusaur", "Charmander", "Charmeleon", "Charizard",
-    // ...add all names up to Gen 9 if you want
+    
 ];
 
         // Populate datalist
@@ -458,7 +458,7 @@
     datalist.appendChild(option);
 });
 
-// Run this in your browser console or Node.js to get all Pokémon names
+// Auto complete fetch
 fetch('https://pokeapi.co/api/v2/pokemon?limit=1025')
   .then(response => response.json())
   .then(data => {
