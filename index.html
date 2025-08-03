@@ -91,7 +91,10 @@
             <canvas id="statChart" class="mb-2 mx-auto"></canvas>
         </div>
         <div class="flex flex-col items-center justify-center space-y-4 mx-auto">
-            <input id="guessInput" type="text" placeholder="Enter Pokémon name" class="border p-2 rounded w-64">
+            <input id="guessInput" type="text" placeholder="Enter Pokémon name" class="border p-2 rounded w-64" list="pokemon-list">
+<datalist id="pokemon-list">
+    <!-- Options will be added by JavaScript -->
+</datalist>
             <div class="flex flex-row items-center justify-center space-x-2 mt-2">
         <button id="guessButton" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Submit Guess</button>
         <button id="nextButton" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">Next Pokémon</button>
@@ -441,6 +444,19 @@
         // Show home menu initially
         homeMenu.classList.remove('hidden');
         gameScreen.classList.add('hidden');
+
+        const allPokemonNames = [
+    "Bulbasaur", "Ivysaur", "Venusaur", "Charmander", "Charmeleon", "Charizard",
+    // ...add all names up to Gen 9 if you want
+];
+
+        // Populate datalist
+        const datalist = document.getElementById('pokemon-list');
+        allPokemonNames.forEach(name => {
+    const option = document.createElement('option');
+    option.value = name;
+    datalist.appendChild(option);
+});
     </script>
 </body>
 </html>
