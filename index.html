@@ -379,14 +379,27 @@
 <body style="background-color: #0f1729;">
     <div class="main-content">
         <div id="homeMenu" class="flex flex-col items-center justify-center space-y-4 mx-auto">
+            <!-- Language Selector -->
+            <div class="flex items-center space-x-4 mb-4">
+                <label for="languageSelect" class="text-lg font-semibold" data-translate="language">Language:</label>
+                <select id="languageSelect" class="border p-2 rounded bg-white text-black">
+                    <option value="en">EN</option>
+                    <option value="fr">FR</option>
+                </select>
+            </div>
             
-            <h1 class="main-title text-4xl font-bold mb-6 text-white"><img src="./4408299.png" alt="BST Guesser Logo" class="w-16 h-16 object-contain"> BST Guesser</h1>
+            <h1 class="main-title text-4xl font-bold mb-6 text-white">
+                <img src="./4408299.png" alt="BST Guesser Logo" class="w-16 h-16 object-contain"> 
+                <span data-translate="title">BST Guesser</span>
+            </h1>
+            
             <div class="flex items-center space-x-4">
-                <label for="fullyEvolvedToggle" class="text-lg font-semibold">Only Fully Evolved Pokémon</label>
+                <label for="fullyEvolvedToggle" class="text-lg font-semibold" data-translate="fullyEvolved">Only Fully Evolved Pokémon</label>
                 <input id="fullyEvolvedToggle" type="checkbox" class="h-5 w-5">
             </div>
-            <button id="dailyChallengeButton" class="bg-blue-500 text-white px-6 py-3 rounded hover:bg-blue-600 text-lg">Daily Challenge</button>
-            <button id="infiniteModeButton" class="bg-purple-500 text-white px-6 py-3 rounded hover:bg-purple-600 text-lg">Infinite Quiz</button>
+            
+            <button id="dailyChallengeButton" class="bg-blue-500 text-white px-6 py-3 rounded hover:bg-blue-600 text-lg" data-translate="dailyChallenge">Daily Challenge</button>
+            <button id="infiniteModeButton" class="bg-purple-500 text-white px-6 py-3 rounded hover:bg-purple-600 text-lg" data-translate="infiniteQuiz">Infinite Quiz</button>
         </div>
         
         <!-- Add loading screen -->
@@ -475,6 +488,135 @@ const previousButton = document.getElementById('previousButton'); // Add this li
 
 // Pokemon names for autocomplete
 const allPokemonNames = [];
+
+// Translations
+const translations = {
+    en: {
+        title: "BST Guesser",
+        language: "Language:",
+        fullyEvolved: "Only Fully Evolved Pokémon",
+        dailyChallenge: "Daily Challenge",
+        infiniteQuiz: "Infinite Quiz",
+        loadingPokemon: "Loading Pokémon...",
+        guessPokemon: "Guess the Pokémon!",
+        enterPokemonName: "Enter Pokémon name",
+        totalGuesses: "Total Guesses:",
+        pokemon: "Pokémon:",
+        infiniteMode: "Infinite Mode",
+        returnToMenu: "Return to Menu",
+        nextPokemon: "Next Pokémon",
+        restartChallenge: "Restart Challenge",
+        submitGuess: "Submit Guess",
+        skip: "Skip",
+        returnToLast: "Return to Last",
+        correct: "Correct! It's",
+        incorrect: "Incorrect.",
+        skipped: "Skipped! It was",
+        types: "Type(s):",
+        ability: "Ability:",
+        dailyChallengeComplete: "Daily Challenge Complete!",
+        score: "Score:",
+        pokemonMaster: "Pokémon Master! 🥇",
+        expertTrainer: "Expert Trainer! 🥈",
+        skilledTrainer: "Skilled Trainer! 🥉",
+        noviceTrainer: "Novice Trainer 📚",
+        keepTraining: "Keep Training! 💪",
+        shareResults: "📤 Share Results",
+        copied: "✅ Copied!",
+        sessionComplete: "Session Complete!",
+        pokemonGuessed: "Pokémon Guessed:",
+        skips: "Skips:",
+        guesses: "Guesses:",
+        efficiency: "efficiency",
+        canYouBeat: "Can you beat my score? Play at:",
+        madeWith: "Made with ❤️ by and for Pokémon fans | Data powered by",
+        allRightsReserved: "All rights reserved",
+        privacyPolicy: "🔒 Privacy Policy",
+        termsOfService: "📋 Terms of Service",
+        privacyText: "This website does not collect personal information. Third-party services (such as ad networks) may use cookies for analytics and advertising. All Pokémon data is sourced from PokéAPI.",
+        termsText: "By using this site, you agree to use it for entertainment purposes only. All Pokémon data is provided by the PokéAPI and is for non-commercial use. Pokémon © Nintendo/Game Freak.",
+        followTwitter: "Follow on Twitter/X",
+        viewGithub: "View on GitHub"
+    },
+    fr: {
+        title: "Devineur BST",
+        language: "Langue :",
+        fullyEvolved: "Pokémon complètement évolués seulement",
+        dailyChallenge: "Défi Quotidien",
+        infiniteQuiz: "Quiz Infini",
+        loadingPokemon: "Chargement des Pokémon...",
+        guessPokemon: "Devinez le Pokémon !",
+        enterPokemonName: "Entrez le nom du Pokémon",
+        totalGuesses: "Total des tentatives :",
+        pokemon: "Pokémon :",
+        infiniteMode: "Mode Infini",
+        returnToMenu: "Retour au Menu",
+        nextPokemon: "Pokémon Suivant",
+        restartChallenge: "Redémarrer le Défi",
+        submitGuess: "Soumettre",
+        skip: "Passer",
+        returnToLast: "Retour au Précédent",
+        correct: "Correct ! C'est",
+        incorrect: "Incorrect.",
+        skipped: "Passé ! C'était",
+        types: "Type(s) :",
+        ability: "Capacité :",
+        dailyChallengeComplete: "Défi Quotidien Terminé !",
+        score: "Score :",
+        pokemonMaster: "Maître Pokémon ! 🥇",
+        expertTrainer: "Dresseur Expert ! 🥈",
+        skilledTrainer: "Dresseur Habile ! 🥉",
+        noviceTrainer: "Dresseur Novice 📚",
+        keepTraining: "Continuez l'Entraînement ! 💪",
+        shareResults: "📤 Partager les Résultats",
+        copied: "✅ Copié !",
+        sessionComplete: "Session Terminée !",
+        pokemonGuessed: "Pokémon Devinés :",
+        skips: "Passés :",
+        guesses: "Tentatives :",
+        efficiency: "efficacité",
+        canYouBeat: "Pouvez-vous battre mon score ? Jouez sur :",
+        madeWith: "Fait avec ❤️ par et pour les fans de Pokémon | Données fournies par",
+        allRightsReserved: "Tous droits réservés",
+        privacyPolicy: "🔒 Politique de Confidentialité",
+        termsOfService: "📋 Conditions d'Utilisation",
+        privacyText: "Ce site web ne collecte pas d'informations personnelles. Les services tiers (comme les réseaux publicitaires) peuvent utiliser des cookies pour l'analyse et la publicité. Toutes les données Pokémon proviennent de PokéAPI.",
+        termsText: "En utilisant ce site, vous acceptez de l'utiliser uniquement à des fins de divertissement. Toutes les données Pokémon sont fournies par PokéAPI et sont destinées à un usage non commercial. Pokémon © Nintendo/Game Freak.",
+        followTwitter: "Suivre sur Twitter/X",
+        viewGithub: "Voir sur GitHub"
+    }
+};
+
+let currentLanguage = 'en';
+
+// Translation function
+function translate(key) {
+    return translations[currentLanguage][key] || translations.en[key] || key;
+}
+
+// Update all translatable elements
+function updateLanguage() {
+    document.querySelectorAll('[data-translate]').forEach(element => {
+        const key = element.getAttribute('data-translate');
+        element.textContent = translate(key);
+    });
+    
+    // Update placeholders
+    const guessInput = document.getElementById('guessInput');
+    if (guessInput) {
+        guessInput.placeholder = translate('enterPokemonName');
+    }
+    
+    // Update loading text
+    const loadingText = document.getElementById('loadingText');
+    if (loadingText) {
+        loadingText.textContent = translate('loadingPokemon');
+    }
+    
+    // Update tooltips
+    document.querySelector('a[title*="Twitter"]')?.setAttribute('title', translate('followTwitter'));
+    document.querySelector('a[title*="GitHub"]')?.setAttribute('title', translate('viewGithub'));
+}
 
 // Event listeners
 dailyChallengeButton.addEventListener('click', () => startGame('daily'));
