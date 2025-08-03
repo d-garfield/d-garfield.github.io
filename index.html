@@ -347,6 +347,12 @@ async function initializeAutocomplete() {
 async function startGame(mode) {
     gameMode = mode;
     
+    // Remove any existing share button before starting new game
+    const existingShareButton = document.querySelector('#gameScreen button[onclick*="generateShareText"]');
+    if (existingShareButton) {
+        existingShareButton.remove();
+    }
+    
     // Show loading screen, hide other screens
     homeMenu.classList.add('hidden');
     gameScreen.classList.add('hidden');
@@ -361,7 +367,7 @@ async function startGame(mode) {
     // Reset game state
     currentPokemonIndex = 0;
     totalGuesses = 0;
-    totalSkips = 0; // Add this line
+    totalSkips = 0;
     pokemonQueue = [];
     
     try {
@@ -742,8 +748,15 @@ function endGame() {
             </div>
         `;
         
-        // Create share button
+        // Remove existing share button if it exists
+        const existingShareButton = document.getElementById('shareResultsButton');
+        if (existingShareButton) {
+            existingShareButton.remove();
+        }
+        
+        // Create share button with ID
         const shareButton = document.createElement('button');
+        shareButton.id = 'shareResultsButton'; // Add ID for easy removal
         shareButton.textContent = '📤 Share Results';
         shareButton.className = 'bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 mt-4 mb-4';
         shareButton.onclick = async () => {
@@ -834,6 +847,12 @@ function returnToMenu() {
     homeMenu.classList.remove('hidden');
     if (myChart) myChart.destroy();
     pokemonSprite.style.display = 'block';
+    
+    // Remove share button if it exists
+    const shareButton = document.getElementById('shareResultsButton');
+    if (shareButton) {
+        shareButton.remove();
+    }
 }
 
 // Initialize on page load
