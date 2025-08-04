@@ -481,7 +481,7 @@
                 <p id="guesses" class="text-lg text-center font-semibold">Total Guesses: 0</p>
                 <p id="progress" class="text-lg text-center font-semibold">Pokémon: 1/5</p>
             </div>
-            <div class="flex flex-col lg:flex-row items-center justify-center lg:space-x-4 w-full max-w-4xl mx-auto px-4">
+            <div class="flex flex-col lg:flex-row items-center justify-center w-full max-w-4xl mx-auto px-4">
                 <div class="flex flex-col items-center w-full">
                     <img id="pokemonSprite" alt="Pokémon Sprite" class="blurred-grey mx-auto" />
                     <!-- Add hints section below the sprite -->
@@ -490,8 +490,32 @@
                         <p id="abilityHint" class="text-lg"><span style="color: #9ca3af;">Ability: ???</span></p>
                     </div>
                 </div>
-                <div class="w-full flex justify-center">
+                <div class="w-full flex justify-center relative">
                     <canvas id="statChart" class="mb-2"></canvas>
+                    <!-- Instructions box: smaller, absolutely positioned on large screens -->
+                    <div class="hidden lg:block absolute right-0 top-0 translate-x-28 w-56 bg-blue-900 bg-opacity-80 rounded-lg p-3 shadow-lg text-white text-xs">
+                        <h2 class="font-bold text-base mb-2">How to Play</h2>
+                        <ul class="list-disc list-inside space-y-1">
+                            <li>Look at the blurred Pokémon sprite and its base stats graph.</li>
+                            <li>Type your guess for the Pokémon's name below.</li>
+                            <li>Hints for type and ability appear after a few incorrect guesses.</li>
+                            <li>Click <span class="font-semibold text-orange-300">Skip</span> to reveal the answer.</li>
+                            <li>Use <span class="font-semibold text-indigo-300">Return to Last</span> to go back.</li>
+                            <li>Guess as many as you can with fewest guesses and skips!</li>
+                        </ul>
+                    </div>
+                </div>
+                <!-- Mobile instructions: below graph, full width, not squished -->
+                <div class="block lg:hidden w-full max-w-xs bg-blue-900 bg-opacity-80 rounded-lg p-3 mt-4 shadow-lg text-white text-xs mx-auto">
+                    <h2 class="font-bold text-base mb-2">How to Play</h2>
+                    <ul class="list-disc list-inside space-y-1">
+                        <li>Look at the blurred Pokémon sprite and its base stats graph.</li>
+                        <li>Type your guess for the Pokémon's name below.</li>
+                        <li>Hints for type and ability appear after a few incorrect guesses.</li>
+                        <li>Click <span class="font-semibold text-orange-300">Skip</span> to reveal the answer.</li>
+                        <li>Use <span class="font-semibold text-indigo-300">Return to Last</span> to go back.</li>
+                        <li>Guess as many as you can with fewest guesses and skips!</li>
+                    </ul>
                 </div>
             </div>
             <div class="flex flex-col items-center justify-center space-y-4 mx-auto w-full px-4">
