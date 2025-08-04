@@ -374,20 +374,67 @@
             margin-top: auto;
             flex-shrink: 0;
         }
+
+        /* Language selector styling */
+#languageSelect {
+    background: linear-gradient(135deg, #1e40af, #3b82f6);
+    border: 1px solid #60a5fa;
+    color: white;
+    font-size: 0.875rem;
+    padding: 4px 8px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+#languageSelect:hover {
+    background: linear-gradient(135deg, #1d4ed8, #2563eb);
+    border-color: #93c5fd;
+}
+
+#languageSelect:focus {
+    outline: none;
+    ring: 2px;
+    ring-color: #60a5fa;
+    ring-opacity: 0.5;
+}
+
+#languageSelect option {
+    background-color: #1e40af;
+    color: white;
+    padding: 4px;
+}
+
+/* Mobile adjustments for footer */
+@media (max-width: 768px) {
+    .flex.flex-col.md\\:flex-row.justify-between.items-center.mb-6 {
+        flex-direction: column !important;
+        text-align: center;
+    }
+    
+    .flex.items-center.space-x-4.mb-4.md\\:mb-0 {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 8px;
+        margin-bottom: 16px !important;
+    }
+    
+    .flex.items-center.space-x-2.ml-4 {
+        margin-left: 0 !important;
+        margin-top: 8px;
+        justify-content: center;
+    }
+    
+    #languageSelect {
+        font-size: 0.8rem;
+        padding: 3px 6px;
+    }
+}
     </style>
 </head>
 <body style="background-color: #0f1729;">
     <div class="main-content">
         <div id="homeMenu" class="flex flex-col items-center justify-center space-y-4 mx-auto">
-            <!-- Language Selector -->
-            <div class="flex items-center space-x-4 mb-4">
-                <label for="languageSelect" class="text-lg font-semibold" data-translate="language">Language:</label>
-                <select id="languageSelect" class="border p-2 rounded bg-white text-black">
-                    <option value="en">EN</option>
-                    <option value="fr">FR</option>
-                </select>
-            </div>
-            
             <h1 class="main-title text-4xl font-bold mb-6 text-white">
                 <img src="./4408299.png" alt="BST Guesser Logo" class="w-16 h-16 object-contain"> 
                 <span data-translate="title">BST Guesser</span>
@@ -446,8 +493,8 @@
                 </div>
                 <!-- Add smaller buttons underneath -->
                 <div class="flex flex-row items-center justify-center space-x-3 mt-2">
-                    <button id="skipButton" class="bg-orange-500 text-white px-3 py-1 rounded hover:bg-orange-600 text-sm">Skip</button>
                     <button id="previousButton" class="bg-indigo-500 text-white px-3 py-1 rounded hover:bg-indigo-600 text-sm hidden">Return to Last</button>
+                    <button id="skipButton" class="bg-orange-500 text-white px-3 py-1 rounded hover:bg-orange-600 text-sm">Skip</button>
                 </div>
             </div>
         </div>
@@ -711,21 +758,25 @@ async function startGame(mode) {
     }
 }
 
-// Generate Pokemon queue with parallel requests
+// Update the generatePokemonQueue function
 async function generatePokemonQueue() {
     const onlyFullyEvolved = fullyEvolvedToggle.checked;
     const queueSize = gameMode === 'daily' ? 5 : 10; // Keep 10 for infinite mode initial load
     
     if (gameMode === 'daily') {
-        // Daily challenge logic remains the same
+        // Daily challenge logic - need to generate more IDs to account for filtering
         const pokemonIds = [];
         const today = new Date().toDateString();
-        for (let i = 0; i < queueSize * 3; i++) {
+        
+        // Generate more IDs to ensure we get enough valid Pokémon after filtering
+        const idsToGenerate = onlyFullyEvolved ? queueSize * 4 : queueSize * 2; // More IDs for fully evolved
+        
+        for (let i = 0; i < idsToGenerate; i++) {
             const seed = hashCode(today + i);
             pokemonIds.push((Math.abs(seed) % 1025) + 1);
         }
         
-        const promises = pokemonIds.slice(0, 15).map(id => 
+        const promises = pokemonIds.map(id => 
             fetch(`https://pokeapi.co/api/v2/pokemon/${id}`)
                 .then(r => r.json())
                 .catch(() => null)
@@ -735,7 +786,7 @@ async function generatePokemonQueue() {
         const validPokemon = results.filter(p => p !== null);
         
         if (onlyFullyEvolved) {
-            const evolutionPromises = validPokemon.slice(0, 10).map(async pokemon => {
+            const evolutionPromises = validPokemon.map(async pokemon => {
                 try {
                     const speciesResponse = await fetch(pokemon.species.url);
                     const species = await speciesResponse.json();
@@ -752,12 +803,28 @@ async function generatePokemonQueue() {
             });
             
             const evolutionResults = await Promise.all(evolutionPromises);
-            pokemonQueue.push(...evolutionResults.filter(p => p !== null).slice(0, queueSize));
+            const fullyEvolvedPokemon = evolutionResults.filter(p => p !== null);
+            pokemonQueue.push(...fullyEvolvedPokemon.slice(0, queueSize));
+            
+            // If we don't have enough fully evolved Pokémon, fill with regular ones
+            if (pokemonQueue.length < queueSize) {
+                const remaining = queueSize - pokemonQueue.length;
+                const regularPokemon = validPokemon.filter(p => 
+                    !pokemonQueue.some(existing => existing.id === p.id)
+                );
+                pokemonQueue.push(...regularPokemon.slice(0, remaining));
+            }
         } else {
             pokemonQueue.push(...validPokemon.slice(0, queueSize));
         }
+        
+        // Ensure we have exactly the right number of Pokémon
+        if (pokemonQueue.length < queueSize) {
+            console.warn(`Only loaded ${pokemonQueue.length} Pokémon instead of ${queueSize}`);
+            // Could add fallback logic here to load more if needed
+        }
     } else {
-        // For infinite mode, use the original logic but load more initially
+        // Infinite mode logic (unchanged)
         const batchSize = 5;
         while (pokemonQueue.length < queueSize) {
             const ids = Array.from({length: batchSize}, () => Math.floor(Math.random() * 1025) + 1);
@@ -1251,6 +1318,9 @@ function endGame() {
         `;
     }
     
+    // Hide hints on results screen
+    document.getElementById('hints').style.display = 'none';
+    
     guessButton.classList.add('hidden');
     nextButton.classList.add('hidden');
     skipButton.classList.add('hidden');
@@ -1325,7 +1395,27 @@ function returnToMenu() {
 document.addEventListener('DOMContentLoaded', function() {
     initializeAutocomplete();
     
-    // Register the datalabels plugin correctly
+    // Language selector event listener
+    const languageSelect = document.getElementById('languageSelect');
+    if (languageSelect) {
+        languageSelect.addEventListener('change', function() {
+            currentLanguage = this.value;
+            updateLanguage();
+            
+            // Save language preference
+            localStorage.setItem('bstGuesserLanguage', currentLanguage);
+        });
+        
+        // Load saved language preference
+        const savedLanguage = localStorage.getItem('bstGuesserLanguage');
+        if (savedLanguage && translations[savedLanguage]) {
+            currentLanguage = savedLanguage;
+            languageSelect.value = currentLanguage;
+            updateLanguage();
+        }
+    }
+    
+    // Register Chart.js plugin
     if (typeof ChartDataLabels !== 'undefined') {
         Chart.register(ChartDataLabels);
     }
@@ -1339,6 +1429,15 @@ document.addEventListener('DOMContentLoaded', function() {
             <div class="flex items-center space-x-4 mb-4 md:mb-0">
                 <img src="./4408299.png" alt="BST Guesser Logo" class="w-8 h-8 object-contain">
                 <span class="text-white font-bold text-lg">BST Guesser</span>
+                
+                <!-- Language Selector -->
+                <div class="flex items-center space-x-2 ml-4">
+                    <label for="languageSelect" class="text-blue-200 text-sm font-medium">Language:</label>
+                    <select id="languageSelect" class="bg-blue-700 border border-blue-500 text-white text-sm rounded px-2 py-1 focus:ring-2 focus:ring-blue-400 focus:border-transparent">
+                        <option value="en" class="bg-blue-700 text-white">EN</option>
+                        <option value="fr" class="bg-blue-700 text-white">FR (soon)</option>
+                    </select>
+                </div>
             </div>
             
             <!-- Social Media Buttons -->
@@ -1353,7 +1452,19 @@ document.addEventListener('DOMContentLoaded', function() {
                     </svg>
                 </a>
                 
-                <!-- GitHub link (optional) -->
+                <!-- Buy Me a Coffee link -->
+                <a href="https://buymeacoffee.com/oakwin" 
+                   target="_blank" 
+                   rel="noopener noreferrer"
+                   class="bg-orange-600 hover:bg-orange-700 text-white p-3 rounded-full transition-all duration-200 transform hover:scale-105 shadow-lg"
+                   title="Buy me a coffee">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M7.5 10.5C7.5 9.67 8.17 9 9 9s1.5.67 1.5 1.5-.67 1.5-1.5 1.5-1.5-.67-1.5-1.5zM12 9c-.83 0-1.5.67-1.5 1.5s.67 1.5 1.5 1.5 1.5-.67 1.5-1.5S12.83 9 12 9zM15 9c-.83 0-1.5.67-1.5 1.5s.67 1.5 1.5 1.5 1.5-.67 1.5-1.5S15.83 9 15 9z"/>
+                        <path d="M20 3H4v10c0 2.21 1.79 4 4 4h6c2.21 0 4-1.79 4-4v-3h2c1.11 0 2-.89 2-2V5c0-1.11-.89-2-2-2zm-2 10c0 1.1-.9 2-2 2H8c-1.1 0-2-.9-2-2V5h12v8zm2-5h-2V6h2v2z"/>
+                    </svg>
+                </a>
+                
+                <!-- GitHub link -->
                 <a href="https://github.com/d-garfield" 
                    target="_blank" 
                    rel="noopener noreferrer"
@@ -1366,7 +1477,7 @@ document.addEventListener('DOMContentLoaded', function() {
             </div>
         </div>
         
-        <!-- Legal Section -->
+        <!-- Rest of your existing footer content -->
         <div class="border-t border-blue-400 pt-4">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 <details class="bg-blue-800 bg-opacity-50 rounded-lg p-4 backdrop-blur-sm">
