@@ -56,7 +56,7 @@
         }
     </script>
     
-    <!-- Update these script tags in the <head> section -->
+    <!-- script tags -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
     <meta name="google-adsense-account" content="ca-pub-2677128924988240">
@@ -69,8 +69,7 @@
         body {
             font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: #0f1729 !important; /* Darker, more faded blue background */
-            color: white !important; /* White text */
-            min-height: 100vh;
+            color: white !important; /* ovveride for dark text I need this and not certain why*/
             display: flex;
             flex-direction: column;
         }
@@ -86,7 +85,7 @@
             height: auto;
             margin-bottom: 1rem;
             display: block;
-            /* Disable right-click context menu */
+            /* Disable right-click context menu so cheaters cant cheat with open image in new tab */
             -webkit-user-select: none;
             -moz-user-select: none;
             -ms-user-select: none;
@@ -110,7 +109,7 @@
         p, h1, h2, h3, label, summary {
             color: white !important;
         }
-        /* Style the footer as static at bottom */
+        /* footer as static at bottom */
         footer {
             background-color: #1e40af !important;
             margin-top: auto;
@@ -120,7 +119,7 @@
             min-height: 250px; /* Set a minimum height for the footer */
             flex-shrink: 0; /* Prevent footer from shrinking */
         }
-        /* Center main title with nice border */
+        /* Center main title with cute border */
         .main-title {
             text-align: center;
             font-weight: 700;
@@ -144,14 +143,14 @@
             padding: 20px 0; /* Add some padding */
         }
 
-        /* Ensure home menu is properly centered */
+        /* centre it */
         #homeMenu {
             width: 100%;
             max-width: 800px;
             margin: 0 auto;
         }
 
-        /* Ensure game screen is properly centered */
+        /* centre it */
         #gameScreen {
             width: 100%;
             max-width: 1200px;
@@ -159,19 +158,19 @@
             padding: 20px 16px;
         }
 
-        /* Add this to the existing <style> section */
+        /* input styling */
         #guessInput {
             color: black !important;
             background-color: white !important;
         }
 
-        /* Also style the datalist options */
+        /*  */
         #pokemon-list option {
             color: black;
             background-color: white;
         }
 
-        /* Loading spinner */
+        /* loading spinner */
         .loading-spinner {
             display: inline-block;
             width: 40px;
@@ -194,13 +193,13 @@
             gap: 16px;
         }
 
-        /* Add drop shadow to all buttons */
+        /* buttons  */
         button {
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) !important;
             transition: box-shadow 0.2s ease !important;
         }
 
-        /* Enhanced shadow on hover */
+        /* on hover */
         button:hover {
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4) !important;
         }
@@ -233,7 +232,7 @@
             margin: 8px 0;
         }
 
-        /* Mobile-friendly canvas sizing */
+        
         canvas {
             max-width: 100% !important;
             width: 100% !important;
@@ -241,7 +240,7 @@
             height: 250px !important; /* Smaller height for mobile */
         }
 
-        /* Better mobile layout for game screen */
+        
         #gameScreen {
             width: 100%;
             max-width: 1200px;
@@ -324,7 +323,7 @@
             }
         }
 
-        /* Ensure canvas container is responsive */
+        
         .flex.flex-col.lg\\:flex-row.items-center.justify-center {
             width: 100%;
             flex-direction: column;
@@ -332,14 +331,14 @@
             gap: 16px;
         }
 
-        /* Make sure the chart container doesn't overflow */
+        
         #statChart {
             display: block;
             margin: 0 auto;
             max-width: 100%;
         }
 
-        /* Logo styling */
+        
         .logo-container {
             display: flex;
             align-items: center;
@@ -372,7 +371,7 @@
             }
         }
 
-        /* Simple sticky footer fix */
+        
         body {
             min-height: 100vh;
             display: flex;
@@ -392,7 +391,7 @@
             flex-shrink: 0;
         }
 
-        /* Language selector styling */
+        
 #languageSelect {
     background: linear-gradient(135deg, #1e40af, #3b82f6);
     border: 1px solid #60a5fa;
@@ -422,7 +421,7 @@
     padding: 4px;
 }
 
-/* Mobile adjustments for footer */
+
 @media (max-width: 768px) {
     .flex.flex-col.md\\:flex-row.justify-between.items-center.mb-6 {
         flex-direction: column !important;
@@ -466,7 +465,7 @@
             <button id="infiniteModeButton" class="bg-purple-500 text-white px-6 py-3 rounded hover:bg-purple-600 text-lg" data-translate="infiniteQuiz">Infinite Quiz</button>
         </div>
         
-        <!-- Add loading screen -->
+        <!-- loading screen -->
         <div id="loadingScreen" class="hidden loading-container">
             <div class="loading-spinner"></div>
             <p id="loadingText" class="text-lg text-white">Loading Pokémon...</p>
@@ -484,7 +483,7 @@
             <div class="flex flex-col lg:flex-row items-center justify-center w-full max-w-4xl mx-auto px-4">
                 <div class="flex flex-col items-center w-full">
                     <img id="pokemonSprite" alt="Pokémon Sprite" class="blurred-grey mx-auto" />
-                    <!-- Add hints section below the sprite -->
+                    <!-- hints section below the sprite -->
                     <div id="hints" class="text-center mt-4">
                         <p id="typeHint" class="text-lg"><span style="color: #9ca3af;">Type(s): ???</span></p>
                         <p id="abilityHint" class="text-lg"><span style="color: #9ca3af;">Ability: ???</span></p>
@@ -540,7 +539,7 @@
             </div>
         </div>
     </div>
-    <!-- the existing footer and script code -->
+    
     <script>
 // Game variables
 let currentPokemon = null;
@@ -571,8 +570,8 @@ const guessesDisplay = document.getElementById('guesses');
 const progressDisplay = document.getElementById('progress');
 const fullyEvolvedToggle = document.getElementById('fullyEvolvedToggle');
 const loadingScreen = document.getElementById('loadingScreen');
-const skipButton = document.getElementById('skipButton'); // Add this line
-const previousButton = document.getElementById('previousButton'); // Add this line
+const skipButton = document.getElementById('skipButton'); 
+const previousButton = document.getElementById('previousButton'); 
 
 // Pokemon names for autocomplete
 const allPokemonNames = [];
@@ -677,12 +676,12 @@ const translations = {
 
 let currentLanguage = 'en';
 
-// Translation function
+// Translation function - WIP
 function translate(key) {
     return translations[currentLanguage][key] || translations.en[key] || key;
 }
 
-// Update all translatable elements
+// Update all translatable elements - WIP
 function updateLanguage() {
     document.querySelectorAll('[data-translate]').forEach(element => {
         const key = element.getAttribute('data-translate');
@@ -713,8 +712,8 @@ returnToMenuButton.addEventListener('click', returnToMenu);
 guessButton.addEventListener('click', checkGuess);
 nextButton.addEventListener('click', nextPokemon);
 restartButton.addEventListener('click', () => startGame(gameMode));
-skipButton.addEventListener('click', skipPokemon); // Add this line
-previousButton.addEventListener('click', previousPokemon); // Add this line
+skipButton.addEventListener('click', skipPokemon); 
+previousButton.addEventListener('click', previousPokemon); 
 
 // Enter key support
 guessInput.addEventListener('keypress', function(e) {
@@ -1100,7 +1099,7 @@ function checkGuess() {
         currentBlur = Math.max(currentBlur - 3, 0);
         pokemonSprite.style.filter = `blur(${currentBlur}px) grayscale(100%)`;
 
-        // Get ability and type hints
+        // Get ability and type hints with ability coming after type
         const abilityHint = currentPokemon.abilities[0].ability.name.charAt(0).toUpperCase() + currentPokemon.abilities[0].ability.name.slice(1);
         const typeHint = currentPokemon.types.map(t => t.type.name.charAt(0).toUpperCase() + t.type.name.slice(1)).join(', ');
 
@@ -1531,23 +1530,12 @@ document.addEventListener('DOMContentLoaded', function() {
         <div class="border-t border-blue-400 pt-4 flex flex-col md:flex-row md:justify-between md:items-start">
     <div class="md:w-2/3">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-            <details class="bg-blue-800 bg-opacity-50 rounded-lg p-4 backdrop-blur-sm">
-                <summary class="cursor-pointer font-semibold text-blue-100 hover:text-white transition-colors">
-                    🔒 Privacy Policy
-                </summary>
-                <p class="mt-3 text-blue-200 text-sm leading-relaxed">
-                    This website does not collect personal information. Third-party services (such as ad networks) may use cookies for analytics and advertising. All Pokémon data is sourced from PokéAPI.<br>
-                    <strong>Note:</strong> For performance, this site may cache Pokémon data in your browser using localStorage. This data is only stored on your device and is not sent to the server.
-                </p>
-            </details>
-            <details class="bg-blue-800 bg-opacity-50 rounded-lg p-4 backdrop-blur-sm">
-                <summary class="cursor-pointer font-semibold text-blue-100 hover:text-white transition-colors">
-                    📋 Terms of Service
-                </summary>
-                <p class="mt-3 text-blue-200 text-sm leading-relaxed">
-                    By using this site, you agree to use it for entertainment purposes only. All Pokémon data is provided by the PokéAPI and is for non-commercial use. Pokémon © Nintendo/Game Freak.
-                </p>
-            </details>
+            <button id="privacyBtn" class="bg-blue-800 bg-opacity-50 rounded-lg p-4 backdrop-blur-sm w-full text-left font-semibold text-blue-100 hover:text-white transition-colors cursor-pointer">
+                🔒 Privacy Policy
+            </button>
+            <button id="termsBtn" class="bg-blue-800 bg-opacity-50 rounded-lg p-4 backdrop-blur-sm w-full text-left font-semibold text-blue-100 hover:text-white transition-colors cursor-pointer">
+                📋 Terms of Service
+            </button>
         </div>
         <!-- Copyright and Credits -->
         <div class="text-center text-blue-300 text-sm">
@@ -1582,7 +1570,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <script>
 const updates = [
     { text: "Mobile loading bug being worked on.", time: "8/4/2025" },
-    // Add more updates here
+    // Just add more updates after fixing things :)
 ];
 
 function loadDevUpdates() {
@@ -1594,6 +1582,47 @@ function loadDevUpdates() {
 }
 const devUpdatesList = document.getElementById('devUpdatesList');
 loadDevUpdates();
+</script>
+
+<!-- Privacy Policy Modal -->
+<div id="privacyModal" style="display:none; position:fixed; z-index:100; left:0; top:0; width:100vw; height:100vh; background:rgba(30,41,59,0.7); align-items:center; justify-content:center;">
+    <div style="background:#1e293b; color:#fff; border-radius:12px; box-shadow:0 4px 24px rgba(0,0,0,0.4); padding:32px 24px 24px 24px; max-width:400px; width:90vw; margin:auto; position:relative;">
+        <button id="closePrivacyModal" style="position:absolute; top:12px; right:12px; background:transparent; border:none; color:#fff; font-size:1.5rem; cursor:pointer;" title="Close">&times;</button>
+        <h2 style="font-size:1.25rem; font-weight:bold; margin-bottom:12px;">Privacy Policy</h2>
+        <p class="mt-3 text-blue-200 text-sm leading-relaxed">
+            This website does not collect personal information. Third-party services (such as ad networks) may use cookies for analytics and advertising. All Pokémon data is sourced from PokéAPI.<br>
+            <strong>Note:</strong> For performance, this site may cache Pokémon data in your browser using localStorage. This data is only stored on your device and is not sent to the server.
+        </p>
+    </div>
+</div>
+
+<!-- Terms of Service Modal -->
+<div id="termsModal" style="display:none; position:fixed; z-index:100; left:0; top:0; width:100vw; height:100vh; background:rgba(30,41,59,0.7); align-items:center; justify-content:center;">
+    <div style="background:#1e293b; color:#fff; border-radius:12px; box-shadow:0 4px 24px rgba(0,0,0,0.4); padding:32px 24px 24px 24px; max-width:400px; width:90vw; margin:auto; position:relative;">
+        <button id="closeTermsModal" style="position:absolute; top:12px; right:12px; background:transparent; border:none; color:#fff; font-size:1.5rem; cursor:pointer;" title="Close">&times;</button>
+        <h2 style="font-size:1.25rem; font-weight:bold; margin-bottom:12px;">Terms of Service</h2>
+        <p class="mt-3 text-blue-200 text-sm leading-relaxed">
+            By using this site, you agree to use it for entertainment purposes only. All Pokémon data is provided by the PokéAPI and is for non-commercial use. Pokémon © Nintendo/Game Freak.
+        </p>
+    </div>
+</div>
+
+<script>
+// Modal logic for Privacy Policy
+const privacyBtn = document.getElementById('privacyBtn');
+const privacyModal = document.getElementById('privacyModal');
+const closePrivacyModal = document.getElementById('closePrivacyModal');
+privacyBtn.onclick = () => { privacyModal.style.display = 'flex'; };
+closePrivacyModal.onclick = () => { privacyModal.style.display = 'none'; };
+privacyModal.onclick = (e) => { if (e.target === privacyModal) closePrivacyModal.onclick(); };
+
+// Modal logic for Terms of Service
+const termsBtn = document.getElementById('termsBtn');
+const termsModal = document.getElementById('termsModal');
+const closeTermsModal = document.getElementById('closeTermsModal');
+termsBtn.onclick = () => { termsModal.style.display = 'flex'; };
+closeTermsModal.onclick = () => { termsModal.style.display = 'none'; };
+termsModal.onclick = (e) => { if (e.target === termsModal) closeTermsModal.onclick(); };
 </script>
 <!-- filepath: c:\Users\Derek\Code-repository\BSTGuesser\d-garfield.github.io\index.html -->
 
