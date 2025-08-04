@@ -15,7 +15,7 @@
     <link rel="dns-prefetch" href="//pokeapi.co">
     <link rel="preconnect" href="https://pokeapi.co" crossorigin>
     
-    <!-- Move XLSX script here, after DOCTYPE -->
+    
     <script type="text/javascript">
         var gk_isXlsx = false;
         var gk_xlsxFileLookup = {};
@@ -49,7 +49,7 @@
         }
     </script>
     
-    <!-- Update these script tags in your <head> section -->
+    <!-- Update these script tags in the <head> section -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
     <meta name="google-adsense-account" content="ca-pub-2677128924988240">
@@ -78,7 +78,17 @@
             width: 250px !important;
             height: auto;
             margin-bottom: 1rem;
-            display: block; /* Ensure consistent display */
+            display: block;
+            /* Disable right-click context menu */
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            pointer-events: none; /* Prevents any mouse interactions */
+        }
+        /* Re-enable pointer events when image is revealed */
+        #pokemonSprite:not(.blurred-grey) {
+            pointer-events: auto;
         }
         .blurred-grey {
             filter: blur(30px) grayscale(100%); /* Changed from 35px to 30px */
@@ -142,7 +152,7 @@
             padding: 20px 16px;
         }
 
-        /* Add this to your existing <style> section */
+        /* Add this to the existing <style> section */
         #guessInput {
             color: black !important;
             background-color: white !important;
@@ -499,7 +509,7 @@
             </div>
         </div>
     </div>
-    <!-- Your existing footer and script code -->
+    <!-- the existing footer and script code -->
     <script>
 // Game variables
 let currentPokemon = null;
@@ -1152,7 +1162,7 @@ function previousPokemon() {
     }
 }
 
-// Add function to load next Pokemon for infinite mode
+// function to load next Pokemon for infinite mode
 async function loadNextInfinitePokemon() {
     const onlyFullyEvolved = fullyEvolvedToggle.checked;
     let attempts = 0;
@@ -1376,7 +1386,7 @@ async function copyToClipboard(text) {
     }
 }
 
-// Add this function to your script section
+// Add this function to the script section
 function returnToMenu() {
     gameScreen.classList.add('hidden');
     loadingScreen.classList.add('hidden');
@@ -1477,7 +1487,7 @@ document.addEventListener('DOMContentLoaded', function() {
             </div>
         </div>
         
-        <!-- Rest of your existing footer content -->
+        <!-- Rest of the existing footer content -->
         <div class="border-t border-blue-400 pt-4">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 <details class="bg-blue-800 bg-opacity-50 rounded-lg p-4 backdrop-blur-sm">
