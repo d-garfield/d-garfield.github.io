@@ -1416,7 +1416,7 @@ async function copyToClipboard(text) {
     }
 }
 
-// Add this function to the script section
+// Return Function
 function returnToMenu() {
     gameScreen.classList.add('hidden');
     loadingScreen.classList.add('hidden');
@@ -1528,39 +1528,72 @@ document.addEventListener('DOMContentLoaded', function() {
         </div>
         
         <!-- Rest of the existing footer content -->
-        <div class="border-t border-blue-400 pt-4">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                <details class="bg-blue-800 bg-opacity-50 rounded-lg p-4 backdrop-blur-sm">
-                    <summary class="cursor-pointer font-semibold text-blue-100 hover:text-white transition-colors">
-                        🔒 Privacy Policy
-                    </summary>
-                    <p class="mt-3 text-blue-200 text-sm leading-relaxed">
-                        This website does not collect personal information. Third-party services (such as ad networks) may use cookies for analytics and advertising. All Pokémon data is sourced from PokéAPI.<br>
-                        <strong>Note:</strong> For performance, this site may cache Pokémon data in your browser using localStorage. This data is only stored on your device and is not sent to the server.
-                    </p>
-                </details>
-                
-                <details class="bg-blue-800 bg-opacity-50 rounded-lg p-4 backdrop-blur-sm">
-                    <summary class="cursor-pointer font-semibold text-blue-100 hover:text-white transition-colors">
-                        📋 Terms of Service
-                    </summary>
-                    <p class="mt-3 text-blue-200 text-sm leading-relaxed">
-                        By using this site, you agree to use it for entertainment purposes only. All Pokémon data is provided by the PokéAPI and is for non-commercial use. Pokémon © Nintendo/Game Freak.
-                    </p>
-                </details>
-            </div>
-            
-            <!-- Copyright and Credits -->
-            <div class="text-center text-blue-300 text-sm">
-                <p class="mb-2">
-                    Made with ❤️ by and for Pokémon fans | Data powered by 
-                    <a href="https://pokeapi.co" target="_blank" class="text-blue-400 hover:text-white underline transition-colors">PokéAPI</a>
+        <div class="border-t border-blue-400 pt-4 flex flex-col md:flex-row md:justify-between md:items-start">
+    <div class="md:w-2/3">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <details class="bg-blue-800 bg-opacity-50 rounded-lg p-4 backdrop-blur-sm">
+                <summary class="cursor-pointer font-semibold text-blue-100 hover:text-white transition-colors">
+                    🔒 Privacy Policy
+                </summary>
+                <p class="mt-3 text-blue-200 text-sm leading-relaxed">
+                    This website does not collect personal information. Third-party services (such as ad networks) may use cookies for analytics and advertising. All Pokémon data is sourced from PokéAPI.<br>
+                    <strong>Note:</strong> For performance, this site may cache Pokémon data in your browser using localStorage. This data is only stored on your device and is not sent to the server.
                 </p>
-                <p>&copy; 2025 BST Guesser - All rights reserved</p>
+            </details>
+            <details class="bg-blue-800 bg-opacity-50 rounded-lg p-4 backdrop-blur-sm">
+                <summary class="cursor-pointer font-semibold text-blue-100 hover:text-white transition-colors">
+                    📋 Terms of Service
+                </summary>
+                <p class="mt-3 text-blue-200 text-sm leading-relaxed">
+                    By using this site, you agree to use it for entertainment purposes only. All Pokémon data is provided by the PokéAPI and is for non-commercial use. Pokémon © Nintendo/Game Freak.
+                </p>
+            </details>
+        </div>
+        <!-- Copyright and Credits -->
+        <div class="text-center text-blue-300 text-sm">
+            <p class="mb-2">
+                Made with ❤️ by and for Pokémon fans | Data powered by 
+                <a href="https://pokeapi.co" target="_blank" class="text-blue-400 hover:text-white underline transition-colors">PokéAPI</a>
+            </p>
+            <p>&copy; 2025 BST Guesser - All rights reserved</p>
+        </div>
+    </div>
+    <div class="md:w-1/3 md:pl-8 flex justify-end mt-6 md:mt-0">
+        <div id="devUpdates" style="
+            background: rgba(30, 58, 138, 0.95);
+            color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+            padding: 16px 20px;
+            min-width: 220px;
+            max-width: 320px;
+            font-size: 0.95rem;
+            font-family: 'Inter', sans-serif;
+        ">
+            <div style="font-weight: bold; margin-bottom: 6px; font-size: 1.05rem;">
+                Developer Updates
+            </div>
+            <div id="devUpdatesList">
+                <!-- Updates will appear here -->
             </div>
         </div>
     </div>
-</footer>
-</body>
-</html>
+</div>
+<script>
+const updates = [
+    { text: "Mobile loading bug being worked on.", time: "8/4/2025" },
+    // Add more updates here
+];
+
+function loadDevUpdates() {
+    devUpdatesList.innerHTML = updates.map(u => 
+        `<div style="margin-bottom:6px;">
+            <span style="color:#93c5fd;">${u.time}</span>: ${u.text}
+        </div>`
+    ).join('');
+}
+const devUpdatesList = document.getElementById('devUpdatesList');
+loadDevUpdates();
+</script>
+<!-- filepath: c:\Users\Derek\Code-repository\BSTGuesser\d-garfield.github.io\index.html -->
 
