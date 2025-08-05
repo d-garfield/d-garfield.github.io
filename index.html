@@ -801,30 +801,27 @@ async function startGame(mode) {
 // Update the generatePokemonQueue function
 async function generatePokemonQueue() {
     const onlyFullyEvolved = fullyEvolvedToggle.checked;
-    const queueSize = gameMode === 'daily' ? 5 : 10; // Keep 10 for infinite mode initial load
-    
+    const queueSize = gameMode === 'daily' ? 5 : 10;
+
     if (gameMode === 'daily') {
-        // Daily challenge logic - need to generate more IDs to account for filtering
-        const pokemonIds = [];
-        const today = new Date().toDateString();
-        
-        // Generate more IDs to ensure we get enough valid Pokémon after filtering
-        const idsToGenerate = onlyFullyEvolved ? queueSize * 4 : queueSize * 2; // More IDs for fully evolved
-        
-        for (let i = 0; i < idsToGenerate; i++) {
-            const seed = hashCode(today + i);
-            pokemonIds.push((Math.abs(seed) % 1025) + 1);
+        // Pick 5 random unique Pokémon IDs for daily challenge
+        const allIds = Array.from({length: 1025}, (_, i) => i + 1);
+        // Shuffle the array using Fisher-Yates
+        for (let i = allIds.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [allIds[i], allIds[j]] = [allIds[j], allIds[i]];
         }
-        
-        const promises = pokemonIds.map(id => 
+        const pokemonIds = allIds.slice(0, onlyFullyEvolved ? queueSize * 4 : queueSize);
+
+        const promises = pokemonIds.map(id =>
             fetch(`https://pokeapi.co/api/v2/pokemon/${id}`)
                 .then(r => r.json())
                 .catch(() => null)
         );
-        
+
         const results = await Promise.all(promises);
         const validPokemon = results.filter(p => p !== null);
-        
+
         if (onlyFullyEvolved) {
             const evolutionPromises = validPokemon.map(async pokemon => {
                 try {
@@ -832,7 +829,7 @@ async function generatePokemonQueue() {
                     const species = await speciesResponse.json();
                     const evolutionResponse = await fetch(species.evolution_chain.url);
                     const evolution = await evolutionResponse.json();
-                    
+
                     if (isFullyEvolved(pokemon.name, evolution.chain)) {
                         return pokemon;
                     }
@@ -841,15 +838,15 @@ async function generatePokemonQueue() {
                 }
                 return null;
             });
-            
+
             const evolutionResults = await Promise.all(evolutionPromises);
             const fullyEvolvedPokemon = evolutionResults.filter(p => p !== null);
             pokemonQueue.push(...fullyEvolvedPokemon.slice(0, queueSize));
-            
+
             // If we don't have enough fully evolved Pokémon, fill with regular ones
             if (pokemonQueue.length < queueSize) {
                 const remaining = queueSize - pokemonQueue.length;
-                const regularPokemon = validPokemon.filter(p => 
+                const regularPokemon = validPokemon.filter(p =>
                     !pokemonQueue.some(existing => existing.id === p.id)
                 );
                 pokemonQueue.push(...regularPokemon.slice(0, remaining));
@@ -857,7 +854,7 @@ async function generatePokemonQueue() {
         } else {
             pokemonQueue.push(...validPokemon.slice(0, queueSize));
         }
-        
+
         // Ensure we have exactly the right number of Pokémon
         if (pokemonQueue.length < queueSize) {
             console.warn(`Only loaded ${pokemonQueue.length} Pokémon instead of ${queueSize}`);
