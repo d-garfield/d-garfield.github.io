@@ -518,7 +518,7 @@
                 </div>
             </div>
             <div class="flex flex-col items-center justify-center space-y-4 mx-auto w-full px-4">
-                <!-- Move message above the input box -->
+                
                 <p id="message" class="text-lg text-center font-semibold">Guess the Pokémon!</p>
                 
                 <input id="guessInput" type="text" placeholder="Enter Pokémon name" class="border p-2 rounded w-64" list="pokemon-list">
@@ -546,8 +546,8 @@ let currentPokemon = null;
 let pokemonQueue = [];
 let currentPokemonIndex = 0;
 let totalGuesses = 0;
-let totalSkips = 0; // Add skip tracking variable
-let currentBlur = 30; // Changed from 35 to 30
+let totalSkips = 0;
+let currentBlur = 30; 
 let myChart = null;
 let gameMode = '';
 let incorrectGuesses = 0;
@@ -576,7 +576,7 @@ const previousButton = document.getElementById('previousButton');
 // Pokemon names for autocomplete
 const allPokemonNames = [];
 
-// Translations
+// Translations (will finish later my french is ass mais J'aime le francais)
 const translations = {
     en: {
         title: "BST Guesser",
@@ -705,6 +705,69 @@ function updateLanguage() {
     document.querySelector('a[title*="GitHub"]')?.setAttribute('title', translate('viewGithub'));
 }
 
+// startGame function 
+async function startGame(mode) {
+    gameMode = mode;
+    homeMenu.classList.add('hidden');
+    loadingScreen.classList.remove('hidden');
+    gameScreen.classList.add('hidden');
+    pokemonQueue = [];
+    currentPokemonIndex = 0;
+    totalGuesses = 0;
+    totalSkips = 0;
+    incorrectGuesses = 0;
+
+    // Set game title
+    if (mode === 'daily') {
+        gameTitle.textContent = 'Daily Challenge';
+    } else {
+        gameTitle.textContent = 'Infinite Mode';
+    }
+
+    // Show loading progress
+    const loadingProgress = document.getElementById('loadingProgress');
+    if (loadingProgress) {
+        loadingProgress.style.width = '0%';
+    }
+
+    try {
+        // Generate the queue
+        await generatePokemonQueue();
+
+        // Update loading progress
+        if (loadingProgress) {
+            loadingProgress.style.width = '100%';
+        }
+
+        // Hide loading, show game
+        loadingScreen.classList.add('hidden');
+        gameScreen.classList.remove('hidden');
+        
+        // Load first Pokemon
+        await loadPokemon(currentPokemonIndex);
+
+        // Reset chart and sprite display
+        if (myChart) myChart.destroy();
+        pokemonSprite.style.display = 'block';
+
+        // Reset hints section
+        document.getElementById('hints').style.display = 'block';
+
+        // Reset button states
+        guessButton.classList.remove('hidden');
+        nextButton.classList.add('hidden');
+        restartButton.classList.add('hidden');
+        skipButton.classList.remove('hidden');
+        previousButton.classList.add('hidden');
+
+    } catch (error) {
+        console.error('Failed to start game:', error);
+        loadingScreen.classList.add('hidden');
+        homeMenu.classList.remove('hidden');
+        alert('Failed to load game. Please check your internet connection and try again.');
+    }
+}
+
 // Event listeners
 dailyChallengeButton.addEventListener('click', () => startGame('daily'));
 infiniteModeButton.addEventListener('click', () => startGame('infinite'));
@@ -746,77 +809,45 @@ async function initializeAutocomplete() {
     }
 }
 
-// Start game
-async function startGame(mode) {
-    gameMode = mode;
-    
-    // Remove any existing share button before starting new game
-    const existingShareButton = document.querySelector('#gameScreen button[onclick*="generateShareText"]');
-    if (existingShareButton) {
-        existingShareButton.remove();
-    }
-    
-    // Show loading screen, hide other screens
-    homeMenu.classList.add('hidden');
-    gameScreen.classList.add('hidden');
-    loadingScreen.classList.remove('hidden');
-    
-    if (mode === 'daily') {
-        gameTitle.textContent = 'Daily Challenge';
-    } else {
-        gameTitle.textContent = 'Infinite Quiz';
-    }
-    
-    // Reset game state
-    currentPokemonIndex = 0;
-    totalGuesses = 0;
-    totalSkips = 0;
-    pokemonQueue = [];
-    
-    try {
-        // Generate Pokemon queue
-        await generatePokemonQueue();
-        
-        // Load first Pokemon
-        await loadPokemon(0);
-        
-        // Hide loading screen, show game screen
-        loadingScreen.classList.add('hidden');
-        gameScreen.classList.remove('hidden');
-        
-        // Update UI
-        guessButton.classList.remove('hidden');
-        nextButton.classList.add('hidden');
-        restartButton.classList.add('hidden');
-        guessesDisplay.textContent = 'Total Guesses: 0';
-        progressDisplay.textContent = `Pokémon: 1/${pokemonQueue.length}`;
-    } catch (error) {
-        console.error('Error starting game:', error);
-        // Hide loading screen, show home menu on error
-        loadingScreen.classList.add('hidden');
-        homeMenu.classList.remove('hidden');
+// helper function (might be useless in this version idk)
+function mulberry32(seed) {
+    return function() {
+        let t = seed += 0x6D2B79F5;
+        t = Math.imul(t ^ t >>> 15, t | 1);
+        t ^= t + Math.imul(t ^ t >>> 7, t | 61);
+        return ((t ^ t >>> 14) >>> 0) / 4294967296;
     }
 }
 
-// Update the generatePokemonQueue function
+function seededShuffle(array, seed) {
+    const random = mulberry32(seed);
+    const shuffled = [...array]; // Create a copy to avoid mutating original
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+}
+
+// generate Queue function
 async function generatePokemonQueue() {
     const onlyFullyEvolved = fullyEvolvedToggle.checked;
     const queueSize = gameMode === 'daily' ? 5 : 10;
 
     if (gameMode === 'daily') {
-        // Pick 5 random unique Pokémon IDs for daily challenge
+        // date as seed (YYYY-MM-DD format)
+        const today = new Date();
+        const seedString = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
+        const seed = hashCode(seedString);
+
+        // Create and shuffle all IDs with the daily seed
         const allIds = Array.from({length: 1025}, (_, i) => i + 1);
-        // Shuffle the array using Fisher-Yates
-        for (let i = allIds.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [allIds[i], allIds[j]] = [allIds[j], allIds[i]];
-        }
-        const pokemonIds = allIds.slice(0, onlyFullyEvolved ? queueSize * 4 : queueSize);
+        const shuffledIds = seededShuffle(allIds, seed);
+
+        const pokemonIds = shuffledIds.slice(0, onlyFullyEvolved ? queueSize * 4 : queueSize);
 
         const promises = pokemonIds.map(id =>
-            fetch(`https://pokeapi.co/api/v2/pokemon/${id}`)
-                .then(r => r.json())
-                .catch(() => null)
+            getPokemon(id).catch(() => null)
         );
 
         const results = await Promise.all(promises);
@@ -858,17 +889,14 @@ async function generatePokemonQueue() {
         // Ensure we have exactly the right number of Pokémon
         if (pokemonQueue.length < queueSize) {
             console.warn(`Only loaded ${pokemonQueue.length} Pokémon instead of ${queueSize}`);
-            // Could add fallback logic here to load more if needed
         }
     } else {
-        // Infinite mode logic (unchanged)
+        // Infinite mode 
         const batchSize = 5;
         while (pokemonQueue.length < queueSize) {
             const ids = Array.from({length: batchSize}, () => Math.floor(Math.random() * 1025) + 1);
             const promises = ids.map(id => 
-                fetch(`https://pokeapi.co/api/v2/pokemon/${id}`)
-                    .then(r => r.json())
-                    .catch(() => null)
+                getPokemon(id).catch(() => null)
             );
             
             const results = await Promise.all(promises);
@@ -950,9 +978,6 @@ async function loadPokemon(index) {
     pokemonSprite.classList.add('blurred-grey');
     pokemonSprite.style.filter = 'blur(30px) grayscale(100%)';
     
-    // Create chart
-    createChart(currentPokemon.stats, currentPokemon.name);
-    
     // Update progress - show different text for infinite mode
     if (gameMode === 'infinite') {
         progressDisplay.textContent = `Pokémon: ${index + 1} (Infinite Mode)`;
@@ -969,6 +994,11 @@ async function loadPokemon(index) {
     // Reset button states
     skipButton.classList.remove('hidden');
     previousButton.classList.add('hidden');
+    
+    // Create chart 
+    setTimeout(() => {
+        createChart(currentPokemon.stats, currentPokemon.name);
+    }, 100);
     
     guessInput.focus();
 }
@@ -1277,9 +1307,6 @@ async function loadPokemon(index) {
     pokemonSprite.classList.add('blurred-grey');
     pokemonSprite.style.filter = 'blur(30px) grayscale(100%)';
     
-    // Create chart
-    createChart(currentPokemon.stats, currentPokemon.name);
-    
     // Update progress - show different text for infinite mode
     if (gameMode === 'infinite') {
         progressDisplay.textContent = `Pokémon: ${index + 1} (Infinite Mode)`;
@@ -1296,6 +1323,11 @@ async function loadPokemon(index) {
     // Reset button states
     skipButton.classList.remove('hidden');
     previousButton.classList.add('hidden');
+    
+    // Create chart with a small delay to ensure canvas is ready
+    setTimeout(() => {
+        createChart(currentPokemon.stats, currentPokemon.name);
+    }, 100);
     
     guessInput.focus();
 }
@@ -1498,7 +1530,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     </svg>
                 </a>
                 
-                <!-- Add this email button beside the Twitter button in your footer social section -->
+                
 <a href="mailto:bstguesser@gmail.com"
    class="bg-blue-700 hover:bg-blue-800 text-white p-3 rounded-full transition-all duration-200 transform hover:scale-105 shadow-lg"
    title="Email bstguesser@gmail.com">
