@@ -541,7 +541,6 @@
     </div>
     
     <script>
-// Add these functions before your DOMContentLoaded event listener
 
 // Seeded random functions for daily challenge
 function mulberry32(seed) {
@@ -809,7 +808,7 @@ async function startGame(mode) {
     }
 }
 
-// Update your generatePokemonQueue function to ensure it loads exactly 5 Pokémon
+// 5 pokemon please god
 async function generatePokemonQueue() {
     const onlyFullyEvolved = fullyEvolvedToggle.checked;
     const queueSize = gameMode === 'daily' ? 5 : 10;
@@ -1620,7 +1619,7 @@ document.addEventListener('DOMContentLoaded', function() {
 </div>
 <script>
 const updates = [
-    { text: "Mobile loading bug being worked on.", time: "8/4/2025" },
+    { text: "Daily challenge bugs being worked on.", time: "8/5/2025" },
     // Just add more updates after fixing things :)
 ];
 
