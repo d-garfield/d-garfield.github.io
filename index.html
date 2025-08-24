@@ -115,8 +115,8 @@
             position: relative;
             bottom: 0;
             width: 100%;
-            min-height: 250px; /* Set a minimum height for the footer */
-            flex-shrink: 0; /* Prevent footer from shrinking */
+            min-height: 250px; 
+            flex-shrink: 0; 
         }
         /* Center main title with cute border */
         .main-title {
@@ -269,19 +269,19 @@
             
             /* Mobile-specific button order - Submit first, then Menu */
             .flex.flex-col.sm\\:flex-row .bg-blue-500 {
-                order: 1; /* Submit Guess button first */
+                order: 1; 
             }
             
             .flex.flex-col.sm\\:flex-row .bg-gray-500 {
-                order: 2; /* Return to Menu button second */
+                order: 2; 
             }
             
             .flex.flex-col.sm\\:flex-row .bg-green-500 {
-                order: 3; /* Next Pokémon button third */
+                order: 3; 
             }
             
             .flex.flex-col.sm\\:flex-row .bg-red-500 {
-                order: 4; /* Restart Challenge button fourth */
+                order: 4; 
             }
             
             /* Smaller buttons container */
@@ -382,7 +382,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            min-height: 60vh; /* Ensure minimum content height */
+            min-height: 60vh; 
         }
 
         footer {
@@ -503,7 +503,7 @@
                         </ul>
                     </div>
                 </div>
-                <!-- Mobile instructions: below graph, full width, not squished -->
+                <!-- Mobile instructions -->
                 <div class="block lg:hidden w-full max-w-xs bg-blue-900 bg-opacity-80 rounded-lg p-3 mt-4 shadow-lg text-white text-xs mx-auto">
                     <h2 class="font-bold text-base mb-2">How to Play</h2>
                     <ul class="list-disc list-inside space-y-1">
@@ -553,7 +553,7 @@ function mulberry32(seed) {
 
 function seededShuffle(array, seed) {
     const random = mulberry32(seed);
-    const shuffled = [...array]; // Create a copy to avoid mutating original
+    const shuffled = [...array]; 
     for (let i = shuffled.length - 1; i > 0; i--) {
         const j = Math.floor(random() * (i + 1));
         [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
