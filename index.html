@@ -460,6 +460,18 @@
                 <input id="fullyEvolvedToggle" type="checkbox" class="h-5 w-5">
             </div>
             
+            <!-- Add these toggles in the home menu section, after the fully evolved toggle -->
+<div class="flex items-center space-x-4">
+    <label for="hintsToggle" class="text-lg font-semibold">Show Hints After Wrong Guesses</label>
+    <input id="hintsToggle" type="checkbox" class="h-5 w-5" checked>
+</div>
+
+<div class="flex items-center space-x-4">
+    <label for="hideSpriteToggle" class="text-lg font-semibold">Hide Sprite Completely</label>
+    <input id="hideSpriteToggle" type="checkbox" class="h-5 w-5">
+</div>
+<!-- filepath: c:\Users\Derek\Code-repository\BSTGuesser\d-garfield.github.io\index.html -->
+            
             <button id="dailyChallengeButton" class="bg-blue-500 text-white px-6 py-3 rounded hover:bg-blue-600 text-lg" data-translate="dailyChallenge">Daily Challenge</button>
             <button id="infiniteModeButton" class="bg-purple-500 text-white px-6 py-3 rounded hover:bg-purple-600 text-lg" data-translate="infiniteQuiz">Infinite Quiz</button>
         </div>
@@ -611,6 +623,8 @@ const fullyEvolvedToggle = document.getElementById('fullyEvolvedToggle');
 const loadingScreen = document.getElementById('loadingScreen');
 const skipButton = document.getElementById('skipButton'); 
 const previousButton = document.getElementById('previousButton'); 
+const hintsToggle = document.getElementById('hintsToggle');
+const hideSpriteToggle = document.getElementById('hideSpriteToggle');
 
 // Pokemon names for autocomplete
 const allPokemonNames = [];
@@ -937,7 +951,10 @@ async function loadPokemon(index) {
     // Safety check
     if (index >= pokemonQueue.length) {
         if (gameMode === 'daily') {
-            endGame();  // This ends the game after just 1 Pokémon!
+            endGame();
+            return;
+        } else {
+            console.error('Pokemon not available for infinite mode');
             return;
         }
     }
@@ -946,10 +963,15 @@ async function loadPokemon(index) {
     incorrectGuesses = 0;
     currentBlur = 30;
     
-    // Update sprite
-    pokemonSprite.src = currentPokemon.sprites.front_default;
-    pokemonSprite.classList.add('blurred-grey');
-    pokemonSprite.style.filter = 'blur(30px) grayscale(100%)';
+    // Handle sprite visibility based on toggle
+    if (hideSpriteToggle.checked) {
+        pokemonSprite.style.display = 'none';
+    } else {
+        pokemonSprite.style.display = 'block';
+        pokemonSprite.src = currentPokemon.sprites.front_default;
+        pokemonSprite.classList.add('blurred-grey');
+        pokemonSprite.style.filter = 'blur(30px) grayscale(100%)';
+    }
     
     // Update progress - show different text for infinite mode
     if (gameMode === 'infinite') {
@@ -968,7 +990,7 @@ async function loadPokemon(index) {
     skipButton.classList.remove('hidden');
     previousButton.classList.add('hidden');
     
-    // Create chart 
+    // Create chart with a small delay so it works properly
     setTimeout(() => {
         createChart(currentPokemon.stats, currentPokemon.name);
     }, 100);
@@ -1080,10 +1102,14 @@ function checkGuess() {
     if (guess === currentPokemon.name) {
         // Green color for correct answer
         message.innerHTML = `<span style="color: #10b981;">Correct! It's ${currentPokemon.name.charAt(0).toUpperCase() + currentPokemon.name.slice(1)}!</span>`;
-        pokemonSprite.classList.remove('blurred-grey');
-        pokemonSprite.style.filter = 'none';
-        pokemonSprite.style.width = '300px';
-        pokemonSprite.style.maxWidth = '300px';
+        
+        // Only show sprite if not hidden by toggle
+        if (!hideSpriteToggle.checked) {
+            pokemonSprite.classList.remove('blurred-grey');
+            pokemonSprite.style.filter = 'none';
+            pokemonSprite.style.width = '300px';
+            pokemonSprite.style.maxWidth = '300px';
+        }
         
         // Update button visibility
         guessButton.classList.add('hidden');
@@ -1096,21 +1122,27 @@ function checkGuess() {
         }
     } else {
         incorrectGuesses++;
-        currentBlur = Math.max(currentBlur - 3, 0);
-        pokemonSprite.style.filter = `blur(${currentBlur}px) grayscale(100%)`;
-
-        // Get ability and type hints with ability coming after type
-        const abilityHint = currentPokemon.abilities[0].ability.name.charAt(0).toUpperCase() + currentPokemon.abilities[0].ability.name.slice(1);
-        const typeHint = currentPokemon.types.map(t => t.type.name.charAt(0).toUpperCase() + t.type.name.slice(1)).join(', ');
+        
+        // Only update sprite blur if sprite is visible
+        if (!hideSpriteToggle.checked) {
+            currentBlur = Math.max(currentBlur - 3, 0);
+            pokemonSprite.style.filter = `blur(${currentBlur}px) grayscale(100%)`;
+        }
 
         // Red color for incorrect answer
         message.innerHTML = `<span style="color: #ef4444;">Incorrect.</span>`;
         
-        if (incorrectGuesses === 2) {
-            document.getElementById('typeHint').textContent = `Type(s): ${typeHint}`;
-        } else if (incorrectGuesses >= 3) {
-            document.getElementById('typeHint').textContent = `Type(s): ${typeHint}`;
-            document.getElementById('abilityHint').textContent = `Ability: ${abilityHint}`;
+        // Only show hints if hints toggle is enabled
+        if (hintsToggle.checked) {
+            const abilityHint = currentPokemon.abilities[0].ability.name.charAt(0).toUpperCase() + currentPokemon.abilities[0].ability.name.slice(1);
+            const typeHint = currentPokemon.types.map(t => t.type.name.charAt(0).toUpperCase() + t.type.name.slice(1)).join(', ');
+            
+            if (incorrectGuesses === 2) {
+                document.getElementById('typeHint').textContent = `Type(s): ${typeHint}`;
+            } else if (incorrectGuesses >= 3) {
+                document.getElementById('typeHint').textContent = `Type(s): ${typeHint}`;
+                document.getElementById('abilityHint').textContent = `Ability: ${abilityHint}`;
+            }
         }
     }
     guessInput.value = '';
@@ -1158,10 +1190,14 @@ function skipPokemon() {
     
     // Orange color for skipped Pokemon
     message.innerHTML = `<span style="color: #f97316;">Skipped! It was ${currentPokemon.name.charAt(0).toUpperCase() + currentPokemon.name.slice(1)}!</span>`;
-    pokemonSprite.classList.remove('blurred-grey');
-    pokemonSprite.style.filter = 'none';
     
-    // Reveal all hints
+    // Only show sprite if not hidden by toggle
+    if (!hideSpriteToggle.checked) {
+        pokemonSprite.classList.remove('blurred-grey');
+        pokemonSprite.style.filter = 'none';
+    }
+    
+    // Always reveal all hints when skipping (regardless of toggle)
     const abilityHint = currentPokemon.abilities[0].ability.name.charAt(0).toUpperCase() + currentPokemon.abilities[0].ability.name.slice(1);
     const typeHint = currentPokemon.types.map(t => t.type.name.charAt(0).toUpperCase() + t.type.name.slice(1)).join(', ');
     document.getElementById('typeHint').textContent = `Type(s): ${typeHint}`;
@@ -1275,10 +1311,15 @@ async function loadPokemon(index) {
     incorrectGuesses = 0;
     currentBlur = 30;
     
-    // Update sprite
-    pokemonSprite.src = currentPokemon.sprites.front_default;
-    pokemonSprite.classList.add('blurred-grey');
-    pokemonSprite.style.filter = 'blur(30px) grayscale(100%)';
+    // Handle sprite visibility based on toggle
+    if (hideSpriteToggle.checked) {
+        pokemonSprite.style.display = 'none';
+    } else {
+        pokemonSprite.style.display = 'block';
+        pokemonSprite.src = currentPokemon.sprites.front_default;
+        pokemonSprite.classList.add('blurred-grey');
+        pokemonSprite.style.filter = 'blur(30px) grayscale(100%)';
+    }
     
     // Update progress - show different text for infinite mode
     if (gameMode === 'infinite') {
@@ -1297,7 +1338,7 @@ async function loadPokemon(index) {
     skipButton.classList.remove('hidden');
     previousButton.classList.add('hidden');
     
-    // Create chart with a small delay so it works properly idk that was the fix i needed
+    // Create chart with a small delay so it works properly
     setTimeout(() => {
         createChart(currentPokemon.stats, currentPokemon.name);
     }, 100);
