@@ -510,7 +510,6 @@
                             <li>Type your guess for the Pokémon's name below.</li>
                             <li>Hints for type and ability appear after a few incorrect guesses.<span class="font-semibold text-red-300"> <br>( -50 points )</span></li>
                             <li>Click <span class="font-semibold text-orange-300">Skip ( -150 points )</span> to reveal the answer.</li>
-                            <li>Use <span class="font-semibold text-indigo-300">Return to Last</span> to go back.</li>
                             <li>Guess as many as you can with fewest guesses and skips!</li>
                         </ul>
                     </div>
@@ -520,11 +519,10 @@
                     <h2 class="font-bold text-base mb-2">How to Play</h2>
                     <ul class="list-disc list-inside space-y-1">
                         <li>Look at the blurred Pokémon sprite and its base stats graph.</li>
-                            <li>Type your guess for the Pokémon's name below.</li>
-                            <li>Hints for type and ability appear after a few incorrect guesses.<span class="font-semibold text-red-300"> ( -50 points )</span></li>
-                            <li>Click <span class="font-semibold text-orange-300">Skip ( -150 points )</span> to reveal the answer.</li>
-                            <li>Use <span class="font-semibold text-indigo-300">Return to Last</span> to go back.</li>
-                            <li>Guess as many as you can with fewest guesses and skips!</li>
+                        <li>Type your guess for the Pokémon's name below.</li>
+                        <li>Hints for type and ability appear after a few incorrect guesses.<span class="font-semibold text-red-300"> ( -50 points )</span></li>
+                        <li>Click <span class="font-semibold text-orange-300">Skip ( -150 points )</span> to reveal the answer.</li>
+                        <li>Guess as many as you can with fewest guesses and skips!</li>
                     </ul>
                 </div>
             </div>
@@ -544,7 +542,6 @@
                 </div>
                 <!-- Add smaller buttons underneath -->
                 <div class="flex flex-row items-center justify-center space-x-3 mt-2">
-                    <button id="previousButton" class="bg-indigo-500 text-white px-3 py-1 rounded hover:bg-indigo-600 text-sm hidden">Return to Last</button>
                     <button id="skipButton" class="bg-orange-500 text-white px-3 py-1 rounded hover:bg-orange-600 text-sm">Skip</button>
                 </div>
             </div>
@@ -622,7 +619,6 @@ const progressDisplay = document.getElementById('progress');
 const fullyEvolvedToggle = document.getElementById('fullyEvolvedToggle');
 const loadingScreen = document.getElementById('loadingScreen');
 const skipButton = document.getElementById('skipButton'); 
-const previousButton = document.getElementById('previousButton'); 
 const hintsToggle = document.getElementById('hintsToggle');
 const hideSpriteToggle = document.getElementById('hideSpriteToggle');
 
@@ -811,7 +807,6 @@ async function startGame(mode) {
         nextButton.classList.add('hidden');
         restartButton.classList.add('hidden');
         skipButton.classList.remove('hidden');
-        previousButton.classList.add('hidden');
 
     } catch (error) {
         console.error('Failed to start game:', error);
@@ -988,7 +983,6 @@ async function loadPokemon(index) {
     
     // Reset button states
     skipButton.classList.remove('hidden');
-    previousButton.classList.add('hidden');
     
     // Create chart with a small delay so it works properly
     setTimeout(() => {
@@ -1116,10 +1110,6 @@ function checkGuess() {
         skipButton.classList.add('hidden');
         nextButton.classList.remove('hidden');
         
-        // Show previous button if not on first Pokemon
-        if (currentPokemonIndex > 0) {
-            previousButton.classList.remove('hidden');
-        }
     } else {
         incorrectGuesses++;
         
@@ -1207,25 +1197,13 @@ function skipPokemon() {
     skipButton.classList.add('hidden');
     guessButton.classList.add('hidden');
     nextButton.classList.remove('hidden');
-    
-    // Show previous button if not on first Pokemon
-    if (currentPokemonIndex > 0) {
-        previousButton.classList.remove('hidden');
-    }
 }
 
-// Previous Pokemon function
-function previousPokemon() {
-    if (currentPokemonIndex > 0) {
-        currentPokemonIndex--;
-        loadPokemon(currentPokemonIndex);
-        
-        // Reset button states
-        guessButton.classList.remove('hidden');
-        nextButton.classList.add('hidden');
-        skipButton.classList.remove('hidden');
-        previousButton.classList.add('hidden');
-    }
+// Helper function to reset button states
+function resetButtonStates() {
+    guessButton.classList.remove('hidden');
+    nextButton.classList.add('hidden');
+    skipButton.classList.remove('hidden');
 }
 
 // function to load next Pokemon for infinite mode
@@ -1277,18 +1255,6 @@ async function loadNextInfinitePokemon() {
     }
 }
 
-// Helper function to reset button states
-function resetButtonStates() {
-    guessButton.classList.remove('hidden');
-    nextButton.classList.add('hidden');
-    skipButton.classList.remove('hidden');
-    
-    // Show previous button if not on first Pokemon
-    if (currentPokemonIndex > 0) {
-        previousButton.classList.remove('hidden');
-    }
-}
-
 // Update the loadPokemon function to handle infinite mode progress display
 async function loadPokemon(index) {
     // For infinite mode, make sure we have enough Pokemon loaded 
@@ -1336,7 +1302,6 @@ async function loadPokemon(index) {
     
     // Reset button states
     skipButton.classList.remove('hidden');
-    previousButton.classList.add('hidden');
     
     // Create chart with a small delay so it works properly
     setTimeout(() => {
@@ -1406,7 +1371,6 @@ function endGame() {
     guessButton.classList.add('hidden');
     nextButton.classList.add('hidden');
     skipButton.classList.add('hidden');
-    previousButton.classList.add('hidden');
     restartButton.classList.remove('hidden');
     pokemonSprite.style.display = 'none';
     if (myChart) myChart.destroy();
@@ -1531,7 +1495,6 @@ document.addEventListener('DOMContentLoaded', function() {
     nextButton.addEventListener('click', nextPokemon);
     restartButton.addEventListener('click', () => startGame(gameMode));
     skipButton.addEventListener('click', skipPokemon);
-    previousButton.addEventListener('click', previousPokemon);
 
     // Enter key functionality
     guessInput.addEventListener('keydown', function(event) {
@@ -1655,7 +1618,7 @@ document.addEventListener('DOMContentLoaded', function() {
 </div>
 <script>
 const updates = [
-    { text: "Evo toggle fixed", time: "8/6/2025" },
+    { text: "Added toggles for hints, made default be fully evolved", time: "26-11-2025" },
     // Just add more updates after fixing things :)
 ];
 
