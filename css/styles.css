@@ -433,9 +433,4 @@ body {
     right: 10px;
 }
 
-/* Hide on mobile/tablet */
-@media (max-width: 1400px) {
-    .side-ad {
-        display: none;
-    }
-}
+
