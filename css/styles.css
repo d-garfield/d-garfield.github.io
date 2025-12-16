@@ -1,0 +1,382 @@
+ 
+        body {
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #0f1729 !important; /* Darker, more faded blue background */
+            color: white !important; /* ovveride for dark text I need this and not certain why*/
+            display: flex;
+            flex-direction: column;
+        }
+        canvas {
+            max-width: 100% !important;
+            width: 100% !important;
+            margin: 0 auto;
+            height: 250px !important; /* Smaller height for mobile */
+        }
+        #pokemonSprite {
+            max-width: 250px !important;
+            width: 250px !important;
+            height: auto;
+            margin-bottom: 1rem;
+            display: block;
+            /* Disable right-click context menu so cheaters cant cheat with open image in new tab */
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            pointer-events: none; /* Prevents any mouse interactions */
+        }
+        /* Re-enable pointer events when image is revealed */
+        #pokemonSprite:not(.blurred-grey) {
+            pointer-events: auto;
+        }
+        .blurred-grey {
+            filter: blur(30px) grayscale(100%); /* Changed from 35px to 30px */
+        }
+        #statChart {
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+            max-width: 100%;
+        }
+        /* Override any dark text */
+        p, h1, h2, h3, label, summary {
+            color: white !important;
+        }
+        /* footer as static at bottom */
+        footer {
+            background-color: #1e40af !important;
+            margin-top: auto;
+            position: relative;
+            bottom: 0;
+            width: 100%;
+            min-height: 250px; 
+            flex-shrink: 0; 
+        }
+        /* Center main title with cute border */
+        .main-title {
+            text-align: center;
+            font-weight: 700;
+            letter-spacing: -0.025em;
+            border: 3px solid #60a5fa;
+            border-radius: 12px;
+            padding: 16px 24px;
+            background: linear-gradient(135deg, rgba(96, 165, 250, 0.1), rgba(147, 197, 253, 0.1));
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin: 0 auto;
+            display: inline-block;
+        }
+        /* Main content wrapper */
+        .main-content {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: calc(100vh - 250px); /* Reserve space for footer */
+            width: 100%;
+            padding: 20px 0; /* Add some padding */
+        }
+
+        /* centre it */
+        #homeMenu {
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* centre it */
+        #gameScreen {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px 16px;
+        }
+
+        /* input styling */
+        #guessInput {
+            color: black !important;
+            background-color: white !important;
+        }
+
+        /*  */
+        #pokemon-list option {
+            color: black;
+            background-color: white;
+        }
+
+        /* loading spinner */
+        .loading-spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 4px solid #60a5fa;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+        }
+
+        /* buttons  */
+        button {
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) !important;
+            transition: box-shadow 0.2s ease !important;
+        }
+
+        /* on hover */
+        button:hover {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4) !important;
+        }
+
+        /* Pressed state */
+        button:active {
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
+        }
+
+        /* Results styling */
+        .results-container {
+            background: linear-gradient(135deg, rgba(96, 165, 250, 0.1), rgba(147, 197, 253, 0.1));
+            border: 2px solid #60a5fa;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 16px 0;
+            text-align: center;
+        }
+
+        .score-display {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #10b981;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .rank-display {
+            font-size: 1.2rem;
+            color: #fbbf24;
+            margin: 8px 0;
+        }
+
+        
+        canvas {
+            max-width: 100% !important;
+            width: 100% !important;
+            margin: 0 auto;
+            height: 250px !important; /* Smaller height for mobile */
+        }
+
+        
+        #gameScreen {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px 16px;
+        }
+
+        /* Responsive flex layout */
+        .flex.flex-col.lg\\:flex-row {
+            flex-direction: column !important;
+            gap: 16px;
+        }
+
+        /* Mobile button adjustments */
+        @media (max-width: 768px) {
+            /* Stack buttons vertically on small screens */
+            .flex.flex-row.items-center.justify-center.space-x-2 {
+                flex-direction: column !important;
+                gap: 8px !important;
+                width: 100%;
+            }
+            
+            .flex.flex-row.items-center.justify-center.space-x-2 > button {
+                width: 100% !important;
+                max-width: 200px;
+            }
+            
+            /* Mobile-specific button order - Submit first, then Menu */
+            .flex.flex-col.sm\\:flex-row .bg-blue-500 {
+                order: 1; 
+            }
+            
+            .flex.flex-col.sm\\:flex-row .bg-gray-500 {
+                order: 2; 
+            }
+            
+            .flex.flex-col.sm\\:flex-row .bg-green-500 {
+                order: 3; 
+            }
+            
+            .flex.flex-col.sm\\:flex-row .bg-red-500 {
+                order: 4; 
+            }
+            
+            /* Smaller buttons container */
+            .flex.flex-row.items-center.justify-center.space-x-3 {
+                flex-direction: row !important;
+                gap: 12px !important;
+                width: 100%;
+                justify-content: center;
+            }
+            
+            /* Canvas adjustments for mobile */
+            canvas {
+                height: 200px !important;
+                max-width: 350px !important;
+            }
+            
+            /* Pokemon sprite adjustments */
+            #pokemonSprite {
+                max-width: 250px !important;
+                width: 250px !important;
+            }
+            
+            /* Input field adjustments */
+            #guessInput {
+                width: 100% !important;
+                max-width: 300px;
+            }
+            
+            /* Title adjustments */
+            .main-title {
+                font-size: 1.5rem !important;
+                padding: 12px 16px !important;
+            }
+            
+            /* Hints text smaller on mobile */
+            #hints p {
+                font-size: 0.9rem !important;
+            }
+        }
+
+        
+        .flex.flex-col.lg\\:flex-row.items-center.justify-center {
+            width: 100%;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+        }
+
+        
+        #statChart {
+            display: block;
+            margin: 0 auto;
+            max-width: 100%;
+        }
+
+        
+        .logo-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .logo-image {
+            width: 64px;
+            height: 64px;
+            object-fit: contain;
+            filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.3));
+        }
+
+        /* Mobile logo adjustments */
+        @media (max-width: 768px) {
+            .logo-image {
+                width: 48px;
+                height: 48px;
+            }
+            
+            .logo-container {
+                gap: 12px;
+                margin-bottom: 16px;
+            }
+            
+            .logo-container .main-title {
+                font-size: 1.8rem !important;
+            }
+        }
+
+        
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .main-content {
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 60vh; 
+        }
+
+        footer {
+            margin-top: auto;
+            flex-shrink: 0;
+        }
+
+        
+#languageSelect {
+    background: linear-gradient(135deg, #1e40af, #3b82f6);
+    border: 1px solid #60a5fa;
+    color: white;
+    font-size: 0.875rem;
+    padding: 4px 8px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+#languageSelect:hover {
+    background: linear-gradient(135deg, #1d4ed8, #2563eb);
+    border-color: #93c5fd;
+}
+
+#languageSelect:focus {
+    outline: none;
+    ring: 2px;
+    ring-color: #60a5fa;
+    ring-opacity: 0.5;
+}
+
+#languageSelect option {
+    background-color: #1e40af;
+    color: white;
+    padding: 4px;
+}
+
+
+@media (max-width: 768px) {
+    .flex.flex-col.md\\:flex-row.justify-between.items-center.mb-6 {
+        flex-direction: column !important;
+        text-align: center;
+    }
+    
+    .flex.items-center.space-x-4.mb-4.md\\:mb-0 {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 8px;
+        margin-bottom: 16px !important;
+    }
+    
+    .flex.items-center.space-x-2.ml-4 {
+        margin-left: 0 !important;
+        margin-top: 8px;
+        justify-content: center;
+    }
+    
+    #languageSelect {
+        font-size: 0.8rem;
+        padding: 3px 6px;
+    }
+}
+    
