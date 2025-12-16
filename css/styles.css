@@ -415,3 +415,27 @@ body {
 #closeTermsModal:active {
     background-color: rgba(255, 255, 255, 0.2);
 }
+
+/* Side banner ads - doesn't affect layout */
+.side-ad {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 1000;
+    width: 160px;
+}
+
+.left-ad {
+    left: 10px;
+}
+
+.right-ad {
+    right: 10px;
+}
+
+/* Hide on mobile/tablet */
+@media (max-width: 1400px) {
+    .side-ad {
+        display: none;
+    }
+}
